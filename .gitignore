@@ -1,0 +1,21 @@
+# Local SDK, Gradle cache and tools (large, machine-specific)
+.tools/
+
+# Gradle / Android build output
+.gradle/
+build/
+local.properties
+captures/
+*.apk
+*.aab
+
+# Signing keys: never commit
+*.jks
+*.keystore
+
+# Android Studio (if ever opened)
+.idea/
+*.iml
+
+# Claude personal settings
+.claude/settings.local.json
