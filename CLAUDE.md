@@ -36,3 +36,9 @@
 | Android user data | `.tools/android-user` (`ANDROID_USER_HOME`) |
 
 These variables are set in `.claude/settings.json` under `env`. `.tools/` is git-ignored.
+
+**Always run SDK and build tools through `scripts/contain.sh`**, e.g.
+`scripts/contain.sh ./gradlew assembleDebug` or `scripts/contain.sh adb devices`.
+It uses `bwrap` (no sudo) to send all home-folder writes to `.tools/home`. Without it,
+tools write to the real home (the SDK's `android` tool created `~/.java` once; it was removed).
+Never run `android completion` or `android auth`: they change the user profile or sign in.
