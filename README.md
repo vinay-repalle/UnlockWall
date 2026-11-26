@@ -16,6 +16,7 @@ You choose three pictures:
 - Zoom, move and rotate each photo to fit your screen.
 - Normal comes back when the screen turns off, and before a restart or power off.
 - One switch turns the app on or off.
+- Light or dark, following your phone.
 - No internet, no accounts, no ads. Your photos stay on your phone.
 
 ## How it works
@@ -75,8 +76,7 @@ locks, forced power-off, large font sizes and accessibility tools.
 
 ## Status
 
-Phases 0 to 4 are built. Phase 5 (dark mode, longer tests, a signed release) is left.
-There is no release version yet.
+Phases 0 to 4 are done. Phase 5 is in progress: a signed 1.0 release is being tested.
 
 ## Build
 
@@ -85,6 +85,7 @@ Written in Kotlin with Jetpack Compose. All tools live in `.tools/` inside the p
 
 ```bash
 scripts/contain.sh ./gradlew assembleDebug            # build
+scripts/contain.sh ./gradlew :app:assembleRelease     # signed only if you have a key
 scripts/contain.sh ./gradlew :app:testDebugUnitTest   # tests
 scripts/contain.sh adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```

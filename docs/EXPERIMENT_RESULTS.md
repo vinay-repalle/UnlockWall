@@ -350,6 +350,13 @@ Adding a landscape photo, zoom, drag and rotate, the home screen matching the pr
 cancel keeping the old picture, setup steps, activity log and icons: reported as passed.
 Log not read.
 
+### Phase 5 build checks (2026-11-26)
+
+- T-13: a missing and a damaged cached picture are reported and nothing is set (tests on
+  the iQOO, debug build).
+- T-14 (`isSetWallpaperAllowed()` false): not testable on this phone; not run.
+- Lint: 0 errors, 8 warnings. Release 1.0: 2.0 MB, signed, not debuggable.
+
 ### Lock does not always engage at screen off
 
 Twice the screen was woken about 2 s after turning off and the phone was not locked

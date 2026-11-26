@@ -50,7 +50,7 @@ private fun readHealth(app: UnlockWallApp) = Health(
     battery = app.getSystemService(PowerManager::class.java)
         .isIgnoringBatteryOptimizations(app.packageName),
     notifications = app.getSystemService(NotificationManager::class.java).areNotificationsEnabled(),
-    log = app.diagnostics.recent(500),
+    log = app.diagnostics.recent(1_000),
 )
 
 /** Holds the shared state and decides which page is shown. */

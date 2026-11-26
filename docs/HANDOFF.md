@@ -14,8 +14,8 @@ Last updated: 2026-11-26.
 | 1 | Logging "spike" app and experiments on the phone | **Done; gate passed 2026-11-26** (some tests deferred, §8) |
 | 2 | Core logic and unit tests | **Done (2026-11-26)** (§8a) |
 | 3 | Service, boot, wallpaper changes | **Done (2026-11-26)**; overnight test still to run (§8b) |
-| 4 | UI | **Built and accepted except the last change, to be tried** (§8c) |
-| 5 | Hardening and release | Not started |
+| 4 | UI | **Done (2026-11-26)** (§8c) |
+| 5 | Hardening and release | **In progress**: release 1.0 installed on the iQOO, retest running (§8d) |
 
 The app (**UnlockWall**) changes the home screen wallpaper on the iQOO, with a plain first
 screen. The Phase 1 test app was deleted. A1 to A6 passed on the iQOO (F21, F22), with
@@ -228,7 +228,7 @@ iQOO. Still untested: overnight (user will do it later), third-party app authent
 screen design (no blue), moving screen texts to resources and a setup guide. The `spike` module is
 already deleted.
 
-## 8c. Phase 4 (in progress)
+## 8c. Phase 4 (done)
 
 Approved (2026-11-26): the sketched layout (main screen, setup steps page, activity log
 page), light and clean with no blue, an app icon drawn here, no separate face picture,
@@ -250,8 +250,50 @@ cache now also keeps a copy of the whole photo (up to 4096 px) and its placement
 saved earlier have only the cropped version until chosen again.
 
 Verified: 61 unit tests and 15 picture tests (on the iQOO) pass; A7 manifest check; app
-installs and opens without a crash. **Not yet tried by hand:** the new tap and
-Save/Discard flow. Also not tested: large font sizes, accessibility tools, lint.
+installs and opens without a crash. The user then tried the new tap and Save/Discard flow
+and reported it passed. Not tested: large font sizes, accessibility tools, lint.
+
+A debug APK was copied to the iQOO's `Download/UnlockWall.apk` at the user's request.
+The user may share it with a friend (realme).
+
+## 8d. Phase 5 (in progress)
+
+Approved (2026-11-26): lint, dark mode and accessibility, error tests, signed release 1.0
+with shrinking, retest, 24-hour test, realme (Android 15 or 16, not checked), "Save log to
+Downloads", signing key in `.tools/keys/`, lint/shrink downloads, uninstalling the debug
+app when it is time (tell the user just before). No Play Store.
+
+**Signing key:** `.tools/keys/unlockwall-release.jks` and `keystore.properties` (holds the
+password; never print or commit it). Certificate `CN=UnlockWall`, SHA-256
+`c46a3f5c8955ba2caa8b69b163829ce105e830269bbc323a9824ef26020356ad`. They exist only on
+this laptop: **the user must back them up**, or the installed app can never be updated.
+
+Done: dark mode (follows the phone), headings and labels for screen readers, wrapping
+buttons for large text, Save log, backup and device-transfer exclusion, version 1.0
+(code 2), release build with R8 (2 MB; debug is 31 MB). Release copy and R8 mapping in
+`.tools/release/1.0/`.
+
+```bash
+scripts/contain.sh ./gradlew :app:assembleRelease :app:lintDebug :app:testDebugUnitTest
+```
+
+Lint: 0 errors, 8 warnings, left on purpose (newer SDK, plugin and Compose versions;
+battery-exemption Play policy; an AndroidX lint check that cannot load; `-v26` icon folder,
+because removing the suffix broke resource linking; a KTX style hint).
+
+Verified: 61 unit tests; 17 tests on the iQOO with the debug build; release signature and
+manifest checked (not debuggable). **Not tested:** the release build on a phone at all,
+dark mode, large text, screen reader, Save log, notification denied, force stop, forced
+power-off, 24 hours, the realme. TalkBack users cannot zoom or move a photo.
+
+**Release installed on the iQOO (2026-11-26, after about 16:02):** starts without a crash,
+not debuggable. `Download/UnlockWall.apk` on the phone is now this release. The old debug
+log was saved to `.tools/release/debug-diagnostics-before-1.0.log`. A release log can only
+be read after the user taps "Save log to Downloads":
+`scripts/contain.sh adb shell 'ls /sdcard/Download/unlockwall-log-*'`.
+
+**Next:** the user sets it up and retests; then force stop, notification off, restart,
+forced power-off, 24 hours, the realme; finish docs and commit message.
 
 ## 9. Git
 

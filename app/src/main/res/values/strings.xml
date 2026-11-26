@@ -4,6 +4,7 @@
 
     <string name="switch_on">On</string>
     <string name="switch_off">Off</string>
+    <string name="switch_description">Turn UnlockWall on or off</string>
     <string name="status_need_normal">Add a Normal picture to start.</string>
     <string name="status_not_running">Not running. Open the setup steps.</string>
     <string name="status_working">Working. Changes begin about a minute after switching on.</string>
@@ -62,6 +63,10 @@
     <string name="autostart_confirm">I have turned it on</string>
 
     <string name="log_empty">Nothing yet.</string>
+    <string name="save_log">Save log to Downloads</string>
+    <string name="save_log_note">Phone model, times and events. No pictures.</string>
+    <string name="log_saved">Saved in Downloads: %s</string>
+    <string name="log_not_saved">The log could not be saved.</string>
     <string name="log_quick">Quick unlock</string>
     <string name="log_face">Face unlock: Quick picture</string>
     <string name="log_slow">Slow unlock</string>

@@ -10,7 +10,8 @@ import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -67,6 +68,7 @@ private sealed interface Loaded {
  *
  * @param uri a newly chosen photo, or null to adjust the saved picture.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun EditorScreen(
     slot: Slot,
@@ -227,7 +229,7 @@ fun EditorScreen(
         if (failedToSave) {
             Text(stringResource(R.string.picture_not_saved), color = MaterialTheme.colorScheme.error)
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(
                 onClick = { apply(CropMath.rotate(adjustment())) },
                 enabled = picture != null,
@@ -236,18 +238,14 @@ fun EditorScreen(
                 onClick = { apply(Adjustment()) },
                 enabled = picture != null,
             ) { Text(stringResource(R.string.reset)) }
-        }
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onChangePhoto) { Text(stringResource(R.string.change_picture)) }
             // Normal cannot be removed: without it nothing could be restored.
             if (hasSaved && slot != Slot.NORMAL) {
                 TextButton(onClick = onRemove) { Text(stringResource(R.string.remove_picture)) }
             }
-            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
-                Button(enabled = changed && !saving, onClick = ::save) {
-                    Text(stringResource(R.string.save))
-                }
-            }
+        }
+        Button(onClick = ::save, modifier = Modifier.fillMaxWidth(), enabled = changed && !saving) {
+            Text(stringResource(R.string.save))
         }
     }
 }

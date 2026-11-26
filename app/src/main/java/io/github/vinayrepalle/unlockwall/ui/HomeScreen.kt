@@ -34,6 +34,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -65,7 +66,12 @@ fun HomeScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
-        Text(stringResource(R.string.app_name), fontSize = 28.sp, fontWeight = FontWeight.Bold)
+        Text(
+            stringResource(R.string.app_name),
+            Modifier.semantics { heading() },
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+        )
         Spacer(Modifier.height(16.dp))
 
         Row(
@@ -93,7 +99,13 @@ fun HomeScreen(
                     ),
                 )
             }
-            Switch(checked = enabled, enabled = ready || enabled, onCheckedChange = onSwitch)
+            val switchName = stringResource(R.string.switch_description)
+            Switch(
+                checked = enabled,
+                onCheckedChange = onSwitch,
+                modifier = Modifier.semantics { contentDescription = switchName },
+                enabled = ready || enabled,
+            )
         }
 
         if (stepsLeft > 0) {
@@ -111,12 +123,17 @@ fun HomeScreen(
                     Text(stringResource(R.string.setup_card), fontWeight = FontWeight.Bold)
                     Muted(pluralStringResource(R.plurals.setup_left, stepsLeft, stepsLeft))
                 }
-                Text("›", fontSize = 22.sp)
+                Arrow()
             }
         }
 
         Spacer(Modifier.height(28.dp))
-        Text(stringResource(R.string.your_pictures), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text(
+            stringResource(R.string.your_pictures),
+            Modifier.semantics { heading() },
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+        )
         Muted(stringResource(R.string.pictures_hint))
         Spacer(Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {

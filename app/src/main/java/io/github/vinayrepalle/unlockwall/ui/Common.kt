@@ -13,6 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,6 +36,17 @@ fun Muted(text: String, modifier: Modifier = Modifier) {
     Text(text, modifier, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
+/** Decoration only: screen readers skip it. */
+@Composable
+fun Arrow() {
+    Text(
+        "›",
+        Modifier.clearAndSetSemantics {},
+        fontSize = 22.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
 /** A tappable line with an arrow and a divider under it. */
 @Composable
 fun LinkRow(text: String, onClick: () -> Unit) {
@@ -41,7 +55,7 @@ fun LinkRow(text: String, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(text, Modifier.weight(1f))
-        Text("›", fontSize = 22.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Arrow()
     }
     HorizontalDivider()
 }
@@ -52,7 +66,7 @@ fun PageHeader(title: String, onBack: () -> Unit) {
     TextButton(onClick = onBack) { Text("‹ " + stringResource(R.string.back)) }
     Text(
         title,
-        Modifier.padding(top = 4.dp, bottom = 16.dp),
+        Modifier.padding(top = 4.dp, bottom = 16.dp).semantics { heading() },
         fontSize = 24.sp,
         fontWeight = FontWeight.Bold,
     )
