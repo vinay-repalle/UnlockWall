@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A picture in a frame with a small padlock. Drawn for this app. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M38,28 h28 a6,6 0 0 1 6,6 v22 M56,78 h-18 a6,6 0 0 1 -6,-6 v-38 a6,6 0 0 1 6,-6"
+        android:strokeColor="@color/icon_ink"
+        android:strokeWidth="4"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="@color/icon_ink"
+        android:pathData="M36,70 L47,54 L54,63 L59,57 L64,63 V70 Z" />
+    <path
+        android:fillColor="@color/icon_ink"
+        android:pathData="M60,41 m-5,0 a5,5 0 1 0 10,0 a5,5 0 1 0 -10,0" />
+    <path
+        android:fillColor="@color/icon_ink"
+        android:pathData="M62,66 h16 a2,2 0 0 1 2,2 v10 a2,2 0 0 1 -2,2 h-16 a2,2 0 0 1 -2,-2 v-10 a2,2 0 0 1 2,-2 Z" />
+    <path
+        android:pathData="M65,66 v-3 a5,5 0 0 1 10,0 v3"
+        android:strokeColor="@color/icon_ink"
+        android:strokeWidth="3" />
+</vector>

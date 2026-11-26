@@ -14,13 +14,13 @@ Last updated: 2026-11-26.
 | 1 | Logging "spike" app and experiments on the phone | **Done; gate passed 2026-11-26** (some tests deferred, §8) |
 | 2 | Core logic and unit tests | **Done (2026-11-26)** (§8a) |
 | 3 | Service, boot, wallpaper changes | **Done (2026-11-26)**; overnight test still to run (§8b) |
-| 4 | UI | Not started |
+| 4 | UI | **Built and accepted except the last change, to be tried** (§8c) |
 | 5 | Hardening and release | Not started |
 
-The product app (**UnlockWall**) now has its service and a basic screen, but no wallpaper
-behaviour of the real app has been seen on the phone yet. Everything observed so far is
-from the throwaway `spike` module (**UW Spike**). No acceptance test
-(A1 to A9) has been passed; what the spike showed is in
+The app (**UnlockWall**) changes the home screen wallpaper on the iQOO, with a plain first
+screen. The Phase 1 test app was deleted. A1 to A6 passed on the iQOO (F21, F22), with
+two limits: third-party app authentication (T-04) was not tried, and "no delay" (A3) was
+judged by feel only. A7 to A9 are not done. See
 [EXPERIMENT_RESULTS.md](EXPERIMENT_RESULTS.md).
 
 ## 2. Read in this order
@@ -148,27 +148,16 @@ Details: plan §3 (Phase 1), §5.2 (test matrix). Results:
   known.
 - Proposed, not answered: do not ask "is this personal?" when picking a wallpaper.
 
-### The spike
+### The spike (deleted 2026-11-26, at the user's request)
 
-No libraries. Logs screen and unlock events, lock state, timings, process exits and
-keyguard usage events. Has test labels, in-app prompt buttons, wallpaper tests and the
-three-wallpaper "Friend scenario".
-
-```bash
-scripts/contain.sh ./gradlew :spike:assembleDebug --offline
-scripts/contain.sh adb install -r spike/build/outputs/apk/debug/spike-debug.apk  # stops the logger
-scripts/contain.sh adb shell run-as io.github.vinayrepalle.unlockwall.spike cat files/events.log
-```
-
-**Not tested:** lock screen wallpaper, face, third-party in-app prompts, "Save log to
-Downloads", lower half of the new screen by screenshot, unlock delay with and without the
-app (T-15), the realme. Lint not run.
+The `spike` module and the UW Spike app on the phone are gone. A private, git-ignored
+backup of its source and raw event log is in `.tools/spike-backup/` (this laptop only).
 
 ### Deferred tests (still untested)
 
-1. Overnight (user will do it later): unplugged, Friend scenario on, label "Survival". In
+1. Overnight (user will do it later), with UnlockWall: on, unplugged, not swiped away. In
    the morning, without opening the app: PIN unlock, then lock and use a finger on the
-   dark screen. "Personal" should appear.
+   dark screen. The Quick picture should appear.
 2. Force stop. 3. The realme (how to test it, its Android version and unlock methods are
    open). 4. Face, if set up.
 
@@ -221,9 +210,6 @@ run.
 Reading the app's log:
 `scripts/contain.sh adb shell run-as io.github.vinayrepalle.unlockwall cat files/diagnostics.log`
 
-**Before testing:** UW Spike must have Friend scenario off and logging stopped, or both
-apps change the wallpaper.
-
 **First device run (F18):** switching works; face gave Quick in 4 of 7 face-like wakes.
 The user saw no PIN unlock show Quick and approved the fix. Added 2026-11-26 14:14: if the
 lock screen is still up 0.5 s after a slow-looking device unlock, it is Quick
@@ -239,8 +225,33 @@ iQOO. Still untested: overnight (user will do it later), third-party app authent
 (T-04), unlock delay measurement (T-15), forced power-off, the realme, lint.
 
 **Next, Phase 4 (UI), not started:** short plan and questions first. Includes the proper
-screen design (no blue), moving screen texts to resources and a setup guide. Proposed:
-delete the `spike` module and uninstall UW Spike at its start.
+screen design (no blue), moving screen texts to resources and a setup guide. The `spike` module is
+already deleted.
+
+## 8c. Phase 4 (in progress)
+
+Approved (2026-11-26): the sketched layout (main screen, setup steps page, activity log
+page), light and clean with no blue, an app icon drawn here, no separate face picture,
+dark mode and the 24-hour test (A8) moved to Phase 5. **Changed by the user:** choosing a
+photo opens an adjust screen to zoom, move and rotate it. Claude chose: pinch and drag,
+quarter-turn rotate button, photo always fills the screen. No new libraries.
+
+Code: `ui/` (`UnlockWallScreens`, `HomeScreen`, `EditorScreen`, `SetupScreen`,
+`LogScreen`, `ActivityText`), `wallpaper/` (`CropMath`, `Pictures`, `WallpaperCache`).
+Texts are in `res/values/strings.xml`.
+
+**The user tried all seven phone tests on the first Phase 4 build and reported they passed**
+(add, zoom/rotate, preview match, change then cancel, setup, log, icons).
+
+**Then changed at the user's request (2026-11-26):** tapping a filled picture opens the
+adjust screen directly (with "Change photo" and "Remove"; no menu); nothing changes until
+Save; leaving with unsaved changes asks Save or Discard. To allow adjusting again, the
+cache now also keeps a copy of the whole photo (up to 4096 px) and its placement. Pictures
+saved earlier have only the cropped version until chosen again.
+
+Verified: 61 unit tests and 15 picture tests (on the iQOO) pass; A7 manifest check; app
+installs and opens without a crash. **Not yet tried by hand:** the new tap and
+Save/Discard flow. Also not tested: large font sizes, accessibility tools, lint.
 
 ## 9. Git
 

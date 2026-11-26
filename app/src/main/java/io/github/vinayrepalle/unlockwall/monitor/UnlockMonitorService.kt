@@ -16,6 +16,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.SystemClock
 import io.github.vinayrepalle.unlockwall.MainActivity
+import io.github.vinayrepalle.unlockwall.R
 import io.github.vinayrepalle.unlockwall.UnlockWallApp
 import io.github.vinayrepalle.unlockwall.core.PhoneEvent
 import io.github.vinayrepalle.unlockwall.core.Reason
@@ -162,7 +163,11 @@ class UnlockMonitorService : Service() {
 
     private fun notification(): Notification {
         getSystemService(NotificationManager::class.java).createNotificationChannel(
-            NotificationChannel(CHANNEL, "UnlockWall is on", NotificationManager.IMPORTANCE_LOW),
+            NotificationChannel(
+                CHANNEL,
+                getString(R.string.notification_channel),
+                NotificationManager.IMPORTANCE_LOW,
+            ),
         )
         val open = PendingIntent.getActivity(
             this,
@@ -171,8 +176,8 @@ class UnlockMonitorService : Service() {
             PendingIntent.FLAG_IMMUTABLE,
         )
         return Notification.Builder(this, CHANNEL)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_lock)
-            .setContentTitle("UnlockWall is on")
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(getString(R.string.notification_title))
             .setContentIntent(open)
             .setOngoing(true)
             .build()

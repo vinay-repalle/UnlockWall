@@ -16,8 +16,13 @@ import kotlinx.coroutines.flow.map
 /**
  * @property enabled the main switch.
  * @property showing the slot last set successfully; null when unknown.
+ * @property autostartConfirmed the user says Autostart is on (an app cannot read it).
  */
-data class Settings(val enabled: Boolean = false, val showing: Slot? = null)
+data class Settings(
+    val enabled: Boolean = false,
+    val showing: Slot? = null,
+    val autostartConfirmed: Boolean = false,
+)
 
 /** Which pictures exist is not stored here: the files in the wallpaper cache are the truth. */
 class SettingsRepository(private val store: DataStore<Preferences>) {
@@ -29,6 +34,7 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
             Settings(
                 enabled = prefs[ENABLED] ?: false,
                 showing = Slot.entries.find { it.name == prefs[SHOWING] },
+                autostartConfirmed = prefs[AUTOSTART] ?: false,
             )
         }
 
@@ -43,8 +49,13 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
         store.edit { if (slot == null) it.remove(SHOWING) else it[SHOWING] = slot.name }
     }
 
+    suspend fun confirmAutostart() {
+        store.edit { it[AUTOSTART] = true }
+    }
+
     private companion object {
         val ENABLED = booleanPreferencesKey("enabled")
         val SHOWING = stringPreferencesKey("showing")
+        val AUTOSTART = booleanPreferencesKey("autostart_confirmed")
     }
 }

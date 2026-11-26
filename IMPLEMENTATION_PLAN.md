@@ -126,11 +126,12 @@ battery exemption state, notification permission, last event, last result.
 T-15 measurement not run).
 
 ### Phase 4: UI
-Compose: ON/OFF, wallpaper pickers, fallback option, target (home/lock/both),
-diagnostics log, guided setup for battery/autostart. **Exit:** A7-A8.
+Compose: ON/OFF, three picture tiles, adjust screen (zoom, move, rotate), setup steps,
+activity log, app icon. (Fallback and target options dropped: home screen only.)
+**Exit:** A7, and the user accepts the screens. A8 moved to Phase 5.
 
 ### Phase 5: Hardening
-Soak test (24 h), error injection (deleted cache file, no permission, policy block),
+Soak test (24 h, A8), dark mode, error injection (deleted cache file, no permission, policy block),
 accessibility and dark-mode pass, release signing, `lint`, optional Play-policy check.
 
 ## 4. Decided: when to change the picture
@@ -211,5 +212,4 @@ modes, any attempt to read or infer credentials, any network features.
 
 ## 9. Recommended next step
 
-Do **Phase 1**: build the logging spike app; run the unlock matrix; write
-`docs/EXPERIMENT_RESULTS.md`. Only then commit to the final product scope.
+Phase 4 (screen design). See [docs/HANDOFF.md](docs/HANDOFF.md).

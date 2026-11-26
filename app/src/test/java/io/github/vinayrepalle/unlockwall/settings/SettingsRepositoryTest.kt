@@ -48,6 +48,13 @@ class SettingsRepositoryTest {
     }
 
     @Test
+    fun autostartConfirmationIsRemembered() {
+        val file = newFile()
+        withRepository(file) { it.confirmAutostart() }
+        withRepository(file) { assertEquals(true, it.current().autostartConfirmed) }
+    }
+
+    @Test
     fun showingCanBeForgotten() {
         withRepository(newFile()) {
             it.setShowing(Slot.SLOW)

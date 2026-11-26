@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import io.github.vinayrepalle.unlockwall.ui.MainScreen
+import io.github.vinayrepalle.unlockwall.ui.UnlockWallScreens
 import io.github.vinayrepalle.unlockwall.ui.UnlockWallTheme
 
 class MainActivity : ComponentActivity() {
@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             UnlockWallTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { insets ->
-                    MainScreen(Modifier.padding(insets))
+                    UnlockWallScreens(Modifier.padding(insets))
                 }
             }
         }

@@ -336,6 +336,20 @@ the app absent (T-15), overnight, forced power-off.
 - A6: Slow picture removed, a PIN unlock showed Normal. Passed.
 - A3: unlocking does not feel slower. Passed by feel only; no measurement (T-15).
 
+### A7: manifest check (2026-11-26, Phase 4 build)
+
+`aapt2 dump permissions`: `SET_WALLPAPER`, `FOREGROUND_SERVICE`,
+`FOREGROUND_SERVICE_SPECIAL_USE`, `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`,
+`WAKE_LOCK`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, and the app's own
+`DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` (added by AndroidX). No internet permission.
+Exported: the launcher activity and AndroidX's `ProfileInstallReceiver`. No root needed.
+
+### Phase 4 screens, first build (2026-11-26, user's report)
+
+Adding a landscape photo, zoom, drag and rotate, the home screen matching the preview,
+cancel keeping the old picture, setup steps, activity log and icons: reported as passed.
+Log not read.
+
 ### Lock does not always engage at screen off
 
 Twice the screen was woken about 2 s after turning off and the phone was not locked

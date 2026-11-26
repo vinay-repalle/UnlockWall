@@ -1,4 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">UnlockWall</string>
+
+    <string name="switch_on">On</string>
+    <string name="switch_off">Off</string>
+    <string name="status_need_normal">Add a Normal picture to start.</string>
+    <string name="status_not_running">Not running. Open the setup steps.</string>
+    <string name="status_working">Working. Changes begin about a minute after switching on.</string>
+    <string name="status_ready">Ready. Turn on to start.</string>
+
+    <string name="setup_card">Finish setup</string>
+    <plurals name="setup_left">
+        <item quantity="one">%d step left</item>
+        <item quantity="other">%d steps left</item>
+    </plurals>
+
+    <string name="your_pictures">Your pictures</string>
+    <string name="pictures_hint">Tap a picture to add it or to adjust it.</string>
+    <string name="slot_normal">Normal</string>
+    <string name="slot_quick">Quick</string>
+    <string name="slot_slow">Slow</string>
+    <string name="slot_normal_note">Normal: shown while locked and whenever unsure.</string>
+    <string name="slot_quick_note">Quick: after a fast unlock, usually finger or face.</string>
+    <string name="slot_slow_note">Slow: usually PIN. Anyone with your PIN sees it.</string>
+    <string name="add_picture">Add</string>
+    <string name="change_picture">Change photo</string>
+    <string name="remove_picture">Remove</string>
+    <string name="picture_description">%s picture</string>
+    <string name="empty_picture_description">Add %s picture</string>
+
+    <string name="how_it_works">How it works</string>
+    <string name="how_it_works_text">Android does not tell apps how you unlocked, so UnlockWall guesses from how fast it was. A fast PIN could count as quick.\n\nIt is not a security lock. Do not use a picture that must never be seen. If your phone stops the app, the last picture stays.\n\nDo not use it with Extend Unlock (Smart Lock): a phone kept unlocked could show your Quick picture.</string>
+    <string name="activity_log">Activity log</string>
+    <string name="setup_steps">Setup steps</string>
+
+    <string name="adjust_title">Adjust: %s</string>
+    <string name="adjust_hint">Pinch to zoom, drag to move.</string>
+    <string name="rotate">Rotate</string>
+    <string name="reset">Reset</string>
+    <string name="save">Save</string>
+    <string name="discard">Discard</string>
+    <string name="unsaved_title">Save changes?</string>
+    <string name="unsaved_text">If you discard, the picture you had before stays.</string>
+    <string name="unsaved_text_new">If you discard, this picture is not added.</string>
+    <string name="loading">Opening picture…</string>
+    <string name="picture_unreadable">That picture could not be opened.</string>
+    <string name="picture_not_saved">That picture could not be saved.</string>
+    <string name="preview_description">Preview of your picture on the screen</string>
+
+    <string name="back">Back</string>
+    <string name="done">Done</string>
+    <string name="setup_intro">Your phone can stop apps to save battery. These steps keep UnlockWall working.</string>
+    <string name="step_notification">Allow notification</string>
+    <string name="step_notification_note">Shows that UnlockWall is running.</string>
+    <string name="step_battery">Unrestricted battery</string>
+    <string name="step_battery_note">Stops the phone from pausing the app.</string>
+    <string name="step_autostart">Turn on Autostart</string>
+    <string name="step_autostart_note">So it starts again after a restart. In phone Settings, search for "autostart" and turn it on for UnlockWall. The app cannot check this itself.</string>
+    <string name="allow">Allow</string>
+    <string name="open_settings">Open app settings</string>
+    <string name="autostart_confirm">I have turned it on</string>
+
+    <string name="log_empty">Nothing yet.</string>
+    <string name="log_quick">Quick unlock</string>
+    <string name="log_face">Face unlock: Quick picture</string>
+    <string name="log_slow">Slow unlock</string>
+    <string name="log_unsure">Unsure: kept Normal</string>
+    <string name="log_just_started">Just started: kept Normal</string>
+    <string name="log_shutdown">Phone shutting down: Normal restored</string>
+    <string name="log_started">UnlockWall started</string>
+    <string name="log_switched_off">Switched off</string>
+    <string name="log_failed">A picture could not be set</string>
+
+    <string name="notification_title">UnlockWall is on</string>
+    <string name="notification_channel">UnlockWall is running</string>
 </resources>

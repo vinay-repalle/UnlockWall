@@ -16,4 +16,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "UnlockWall"
 include(":app")
-include(":spike") // Phase 1 throwaway logging app
