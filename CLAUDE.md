@@ -1,5 +1,7 @@
 # UnlockWall: rules for Claude
 
+**Start here:** read [docs/HANDOFF.md](docs/HANDOFF.md) for the current state and next step.
+
 ## Hard rules (always follow)
 
 1. **Stay inside this folder.** Only create, edit or delete files inside
@@ -20,6 +22,14 @@
 
 - Short, clear and simple. Plain words. Add detail only when asked.
 
+## Work order
+
+- One phase at a time, in the order in `IMPLEMENTATION_PLAN.md`.
+- For each phase: short plan and open questions, wait for approval, build, test against
+  the exit criteria, update the docs (including `docs/HANDOFF.md`), give a commit
+  message, then stop until the user approves the next phase.
+- Never call a feature working without test evidence. Say what was not tested.
+
 ## Project
 
 - Native Android app: Kotlin, Jetpack Compose, Gradle. See `README.md` and `IMPLEMENTATION_PLAN.md`.
@@ -30,12 +40,13 @@
 
 | What | Where |
 |---|---|
-| Java | system JDK 21 (`/usr/bin/java`), used as is |
+| Java | Temurin JDK 21 in `.tools/jdk` (`JAVA_HOME`; the system Java has no `javac`) |
 | Android SDK | `.tools/android-sdk` (`ANDROID_HOME`) |
 | Gradle cache | `.tools/gradle` (`GRADLE_USER_HOME`) |
 | Android user data | `.tools/android-user` (`ANDROID_USER_HOME`) |
 
-These variables are set in `.claude/settings.json` under `env`. `.tools/` is git-ignored.
+`scripts/contain.sh` sets all of these. The Android and Gradle ones are also in
+`.claude/settings.json` under `env`. `.tools/` is git-ignored.
 
 **Always run SDK and build tools through `scripts/contain.sh`**, e.g.
 `scripts/contain.sh ./gradlew assembleDebug` or `scripts/contain.sh adb devices`.

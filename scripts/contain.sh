@@ -17,7 +17,8 @@ export ANDROID_HOME="$SDK"
 export ANDROID_SDK_ROOT="$SDK"
 export ANDROID_USER_HOME="$TOOLS/android-user"
 export GRADLE_USER_HOME="$TOOLS/gradle"
-export PATH="$SDK/platform-tools:$SDK/cmdline-tools/latest/bin:$PATH"
+export JAVA_HOME="$TOOLS/jdk"
+export PATH="$JAVA_HOME/bin:$SDK/platform-tools:$SDK/cmdline-tools/latest/bin:$PATH"
 
 # Real home is replaced by .tools/home; the project folder is mounted back at its real path.
 exec bwrap --dev-bind / / \

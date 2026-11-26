@@ -6,12 +6,26 @@ unlocked (PIN, pattern, fingerprint, face).
 
 - **Target device:** iQOO Z9x 5G (model PD2353), Android 16 (OriginOS 6)
 - **Constraints:** no root, no custom ROM, never delay or interfere with unlocking
-- **Status:** Stage 1 (feasibility and planning) only. **No app code exists yet.**
-  Nothing in this repository has been run on a device.
+- **Status (2026-11-26):** Phase 0 done. A "hello" app builds, installs and runs on the
+  phone. **No unlock detection or wallpaper feature exists yet.** Next: Phase 1.
 
-Companion document: [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)
+Current state: [docs/HANDOFF.md](docs/HANDOFF.md) ·
+Plan: [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)
+
+## Build and install
+
+```bash
+scripts/contain.sh ./gradlew assembleDebug
+scripts/contain.sh adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+The toolchain lives in `.tools/` (not in git). Versions are in
+[docs/HANDOFF.md](docs/HANDOFF.md).
 
 ---
+
+*Sections 1 to 6 are the Stage 1 report, written before Phase 0. No experiment on
+unlock or wallpaper behaviour has been run since.*
 
 ## 1. Stage 1 feasibility report
 
@@ -199,11 +213,13 @@ Details, interfaces, and phases are in [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_P
 3. **Visible flash** of old wallpaper after unlock; or OEM wallpaper engine ignoring the API.
 4. **`USER_PRESENT` semantics** (fires for swipe-only locks, after trusted-device unlock, possibly after in-app flows). Mitigation: state machine + `KeyguardManager` validation.
 5. **Play policy** for `specialUse` FGS, if distribution via Play is wanted.
-6. **Tooling gap**: the dev machine has no Android SDK yet (§4).
+6. ~~Tooling gap~~: resolved in Phase 0.
 
 ---
 
-## 4. Environment inspected (this machine)
+## 4. Environment inspected (this machine, before Phase 0)
+
+*Out of date: the toolchain is now installed in `.tools/`.*
 
 | Item | Result |
 |---|---|

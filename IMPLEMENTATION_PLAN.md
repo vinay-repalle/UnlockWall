@@ -1,8 +1,9 @@
 # UnlockWall: Implementation Plan
 
-Status: **Stage 1 plan. No code exists. No claim below is verified on hardware** unless
-a test ID is marked "PASSED" (none are yet). See [README.md](README.md) for the
-feasibility evidence behind this plan.
+Status (2026-11-26): **Phase 0 done; Phase 1 is next.** Only a "hello" app exists. No
+unlock or wallpaper claim below is verified on hardware unless a test ID is marked
+"PASSED" (none are yet). See [docs/HANDOFF.md](docs/HANDOFF.md) for the current state
+and [README.md](README.md) for the feasibility evidence behind this plan.
 
 ## 1. Guiding decisions
 
@@ -89,10 +90,9 @@ Setting `fallbackMode ∈ { KEEP_CURRENT, USE_FALLBACK_IMAGE }`. Policy:
 
 ## 3. Phases
 
-### Phase 0: Toolchain (blocker, not yet done)
+### Phase 0: Toolchain (done 2026-11-26; results in docs/HANDOFF.md)
 - Install a full JDK (17 or 21 with `javac`), Android command-line tools,
-  `platform-tools` (adb), `platforms;android-36`, `build-tools`. Optionally
-  Android Studio. (Package choice is the user's; I did not install anything.)
+  `platform-tools` (adb), `platforms;android-36`, `build-tools`.
 - Enable USB debugging on the phone (or wireless debugging); confirm `adb devices`.
 - Record exact firmware (`getprop ro.build.version.*`, OriginOS build).
 - **Exit:** `adb devices` lists the phone; a Gradle "hello" app installs and runs.
@@ -205,7 +205,7 @@ A feature is "working" only when its row has logged device evidence.
 | R5 | Play policy rejects `specialUse` use case | Medium | Distribution only | Sideload/internal track first |
 | R6 | Android 16 background changes affect job-based designs | Low (we avoid jobs) | n/a | Keep the work in the receiver/worker thread |
 | R7 | Accessibility-based detection tempts scope creep | Low | Policy, fragility | Explicitly out of scope for v1 |
-| R8 | No toolchain/device available | Certain today | Blocks all | Phase 0 |
+| R8 | No toolchain/device available | Resolved (Phase 0) | n/a | Setup recorded in docs/HANDOFF.md |
 | R9 | OriginOS 6 docs absent; behaviour differs from Funtouch evidence | Medium | Surprises | All OEM claims treated as unverified until tested |
 
 ## 8. Out of scope (v1)
@@ -215,6 +215,5 @@ modes, any attempt to read or infer credentials, any network features.
 
 ## 9. Recommended next step
 
-Do **Phase 0 then Phase 1**: install the JDK, Android SDK command-line tools and adb;
-connect the iQOO Z9x with USB debugging; build the logging spike app; run the unlock
-matrix; write `docs/EXPERIMENT_RESULTS.md`. Only then commit to the final product scope.
+Do **Phase 1**: build the logging spike app; run the unlock matrix; write
+`docs/EXPERIMENT_RESULTS.md`. Only then commit to the final product scope.
