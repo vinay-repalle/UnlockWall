@@ -11,7 +11,7 @@ First, read in this order:
 1. CLAUDE.md (rules)
 2. docs/HANDOFF.md (current state and next step)
 3. IMPLEMENTATION_PLAN.md (phases, architecture, tests)
-4. README.md (feasibility findings)
+4. README.md and docs/FEASIBILITY.md (feasibility findings)
 
 Rules (always):
 - Only create, edit or delete files inside the UnlockWall folder. This is an office laptop.

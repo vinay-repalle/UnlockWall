@@ -28,7 +28,7 @@ judged by feel only. A7 to A9 are not done. See
 1. [CLAUDE.md](../CLAUDE.md): rules. They override everything else.
 2. This file.
 3. [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md): phases, architecture, tests.
-4. [README.md](../README.md): what Android allows and why.
+4. [README.md](../README.md): what the app does. Research: [FEASIBILITY.md](FEASIBILITY.md).
 
 ## 3. Check before doing any work
 

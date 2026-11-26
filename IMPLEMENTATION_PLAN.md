@@ -2,7 +2,7 @@
 
 Status (2026-11-26): **Phases 0 to 3 done; Phase 4 is next** (overnight test still to run). The screen is a plain first version. Results:
 [docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md). Current state:
-[docs/HANDOFF.md](docs/HANDOFF.md). Feasibility evidence: [README.md](README.md).
+[docs/HANDOFF.md](docs/HANDOFF.md). Feasibility evidence: [docs/FEASIBILITY.md](docs/FEASIBILITY.md).
 
 **Scope of version 1** (Phase 1 gate, 2026-11-26): home screen only; three pictures
 (Normal, Quick unlock, Slow unlock). Android reports no unlock method, so only speed is
@@ -185,7 +185,7 @@ Evidence required anyway: T-15 comparison plus `onReceive` duration logged
 | A4 | With switch OFF, no automatic change ever occurs and the service is not running | T-08, `dumpsys activity services` |
 | A5 | Selected wallpapers are cached app-privately; the app works after the source image is deleted | T-13 + manual |
 | A6 | Unclear unlock or missing picture → Normal (no Normal picture → no change) | T-17 |
-| A7 | No root; no custom ROM; only permissions listed in README §1.9 | manifest review |
+| A7 | No root; no custom ROM; only permissions listed in the README | manifest review |
 | A8 | Survives 24 h soak with documented OEM settings applied | T-12 |
 | A9 | The documentation states plainly which unlock methods are detected on this device, backed by Phase 1 results | `docs/EXPERIMENT_RESULTS.md` |
 
