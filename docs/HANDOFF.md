@@ -292,8 +292,19 @@ log was saved to `.tools/release/debug-diagnostics-before-1.0.log`. A release lo
 be read after the user taps "Save log to Downloads":
 `scripts/contain.sh adb shell 'ls /sdcard/Download/unlockwall-log-*'`.
 
-**Next:** the user sets it up and retests; then force stop, notification off, restart,
-forced power-off, 24 hours, the realme; finish docs and commit message.
+**Release retest (user's report "all done", no problem mentioned; log not read, phone not
+plugged in):** unlocks by finger, PIN and face; adjust screen with Save/Discard; pictures
+and setup kept after reopening; dark and light mode; largest font; Save log to Downloads.
+
+A copy of the release is at `release/UnlockWall-1.0.apk` (git-ignored) and in the phone's
+Downloads. Copying it to the laptop's own Downloads was not done (outside the project).
+
+**Still untested:** on the release: force stop, notifications off, restart, power off.
+Anywhere: forced power-off, overnight and 24 hours (A8; the user asked to leave this out of
+the README, it is **not** tested), the realme, T-04, T-15 measurement, screen reader.
+
+**Next:** read the saved log when the phone is plugged in, then decide with the user which
+of the above to run before calling Phase 5 done.
 
 ## 9. Git
 

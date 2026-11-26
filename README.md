@@ -17,6 +17,7 @@ You choose three pictures:
 - Normal comes back when the screen turns off, and before a restart or power off.
 - One switch turns the app on or off.
 - Light or dark, following your phone.
+- An activity log, which you can save to Downloads.
 - No internet, no accounts, no ads. Your photos stay on your phone.
 
 ## How it works
@@ -71,12 +72,17 @@ On the iQOO Z9x: finger, PIN and face unlock, switching off and on, restart and 
 off, and a PIN prompt inside Settings (correctly ignored). Pattern was checked in early
 experiments only.
 
-**Not yet tested:** overnight and 24-hour running, other phones, other apps' fingerprint
-locks, forced power-off, large font sizes and accessibility tools.
+The 1.0 release has had a shorter check: unlocking, adjusting pictures, saved settings,
+dark and light mode, large text and saving the log. Restart and power off were tested on
+earlier builds and not repeated on it.
+
+**Not yet tested:** other phones, other apps' fingerprint locks, forced power-off and
+accessibility tools such as screen readers.
 
 ## Status
 
-Phases 0 to 4 are done. Phase 5 is in progress: a signed 1.0 release is being tested.
+Phases 0 to 4 are done. Phase 5 is in progress: a signed 1.0 release is built and installed
+on the test phone.
 
 ## Build
 

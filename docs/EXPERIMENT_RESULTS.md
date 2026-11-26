@@ -357,6 +357,13 @@ Log not read.
 - T-14 (`isSetWallpaperAllowed()` false): not testable on this phone; not run.
 - Lint: 0 errors, 8 warnings. Release 1.0: 2.0 MB, signed, not debuggable.
 
+### Release 1.0 retest (iQOO, 2026-11-26, user's report; log not read)
+
+The user reported done, with no problem mentioned: finger, PIN and face unlocks; adjust
+screen with Save/Discard; pictures and setup kept after reopening; dark and light mode;
+largest font size; saving the log. Not repeated on the release: restart, power off, force
+stop, notifications off. **A8 (24-hour soak) and overnight: not run.**
+
 ### Lock does not always engage at screen off
 
 Twice the screen was woken about 2 s after turning off and the phone was not locked
