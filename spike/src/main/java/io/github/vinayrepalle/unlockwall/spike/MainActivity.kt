@@ -40,6 +40,7 @@ class MainActivity : Activity() {
     private lateinit var page: LinearLayout
     private lateinit var loggerValue: TextView
     private lateinit var friendValue: TextView
+    private lateinit var batteryValue: TextView
     private lateinit var unlocksValue: TextView
     private lateinit var details: TextView
 
@@ -57,6 +58,7 @@ class MainActivity : Activity() {
         )
         loggerValue = statusLine("Logger")
         friendValue = statusLine("Friend scenario")
+        batteryValue = statusLine("Unrestricted battery")
         unlocksValue = statusLine("Unlocks with this label")
 
         mainButton("Start logging") {
@@ -71,6 +73,14 @@ class MainActivity : Activity() {
             requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
         }
         row("Usage access settings") { startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)) }
+        row("Allow unrestricted battery") {
+            startActivity(
+                Intent(
+                    Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                    Uri.fromParts("package", packageName, null),
+                ),
+            )
+        }
         row("App settings") {
             startActivity(
                 Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null)),
@@ -170,11 +180,11 @@ class MainActivity : Activity() {
         loggerValue.text = if (running) "\u25CF Running" else "\u25CF Stopped"
         loggerValue.setTextColor(getColor(if (running) R.color.running else R.color.stopped))
         friendValue.text = if (FriendScenario.enabled(this)) "On" else "Off"
+        batteryValue.text = if (exempt) "Yes" else "No"
         unlocksValue.text = (counts[EventLog.label(this)] ?: 0).toString()
         details.text = buildString {
             appendLine("Notification allowed: ${yesNo(notifications)}")
             appendLine("Usage access: ${yesNo(UsageReader.hasAccess(this@MainActivity))}")
-            appendLine("Battery optimisation off for this app: ${yesNo(exempt)}")
             appendLine("Unlocks logged per label:")
             if (counts.isEmpty()) append("  none yet")
             else append(counts.entries.joinToString("\n") { "  ${it.key}: ${it.value}" })

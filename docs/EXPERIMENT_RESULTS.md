@@ -16,7 +16,7 @@ Only what was observed on a real phone is written here.
 | E1 | Does `USER_PRESENT` fire for every unlock, and how fast? | PIN (F2) and fingerprint, dark screen (F6) and lock screen (F7), pattern (F9): every unlock detected |
 | E2 | Does any signal differ between unlock methods? | Timing only: separates quick fingerprint unlocks from PIN, not slow ones from PIN or pattern (F6, F7, F9) |
 | E3 | Do in-app prompts emit anything? | Our own app's prompts: nothing (F8). Third-party apps not run |
-| E4 | Does the service survive? | Not run |
+| E4 | Does the service survive? | Default settings: survives swipe from recents, does not restart after reboot by itself (F14). With exemption and Autostart it starts after reboot (F16). Overnight, force stop not run |
 | E5 | Wallpaper speed, flash, lock screen | Home screen (F10, F11, F12). Lock screen: version 2, not run |
 | E6 | Does OriginOS theming override the wallpaper? | Home screen: no override seen (F10). Reboot, themes, lock screen not run |
 
@@ -206,6 +206,45 @@ Two things to handle in the product:
 - When first seen, the event's stamp was already about 1.2 s old, which confirms the
   offset in F3.
 - The product does not need usage access.
+
+### F14: swipe from recents and reboot, default phone settings (iQOO, 2026-11-26)
+
+- **Swipe from recents:** `TASK_REMOVED` logged, same process kept running, unlocks and
+  wallpaper changes continued.
+- **Reboot while "Personal" was showing (twice): the failure expected.** After the PIN,
+  Personal stayed visible.
+- **The app did not start after reboot until the user opened it** (user's observation).
+  `BOOT_COMPLETED` reached the app about 5 minutes and about 80 seconds after boot, each
+  time within 1 s of the process starting. Normal was restored then.
+- Autostart and battery exemption had not been turned on by us; battery exemption was off.
+
+### F15: broadcasts arrive late and out of order shortly after a reboot (iQOO)
+
+For about 45 s after the first late start, `USER_PRESENT` arrived without a preceding
+`SCREEN_ON`, once 19 ms after `SCREEN_OFF` with the phone reporting locked. The rule
+"unclear keeps Normal" covered these. **Risk not observed but possible:** a late
+`SCREEN_ON` just before `USER_PRESENT` would make a slow unlock look quick and show the
+personal photo. The product must handle this.
+
+### F16: restart and power off with the safeguards (iQOO, 2026-11-26)
+
+User's observations, confirmed by the log:
+
+- Restart and power off with Personal showing: **Normal** after the PIN. The app was not
+  opened; its notification appeared.
+- Both times `ACTION_SHUTDOWN` arrived and Normal was set before power off (310 and
+  342 ms).
+- Quick and slow unlocks kept Normal for a while, then changes resumed.
+
+| After switching on | Restart | Power off |
+|---|---|---|
+| App started (`BOOT_COMPLETED`), seconds since boot | 98 s | 140 s |
+| 60 s hold ends, seconds since boot | about 159 s | about 200 s |
+
+- The unlock signal was not logged before the app started.
+- Battery exemption confirmed with `dumpsys deviceidle`. Autostart cannot be read; the app
+  did start by itself both times.
+- Not covered: forced power-off.
 
 ### Lock does not always engage at screen off
 

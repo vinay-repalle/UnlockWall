@@ -11,14 +11,16 @@ Last updated: 2026-11-26.
 |---|---|---|
 | Planning | Feasibility report and plan | Done |
 | 0 | Toolchain, phone connection, hello app | **Done (2026-11-26)** |
-| 1 | Logging "spike" app and experiments on the phone | **In progress: logging confirmed on the iQOO; session A started** (§8) |
+| 1 | Logging "spike" app and experiments on the phone | **In progress: most iQOO experiments done; overnight, realme and gate left** (§8) |
 | 2 | Core logic and unit tests | Not started |
 | 3 | Service, boot, wallpaper changes | Not started |
 | 4 | UI | Not started |
 | 5 | Hardening and release | Not started |
 
-The product app is only a "hello" screen. Unlock logging and wallpaper test code exist
-only in the throwaway `spike` module. No test in the plan (T-01 to T-18) has been run.
+The product app (**UnlockWall**) is still only a "hello" screen. All unlock and wallpaper
+code is in the throwaway `spike` module (**UW Spike** on the phone). No acceptance test
+(A1 to A9) has been passed; what the spike showed is in
+[EXPERIMENT_RESULTS.md](EXPERIMENT_RESULTS.md).
 
 ## 2. Read in this order
 
@@ -95,6 +97,8 @@ user if it matters.
 - The system Java (`/usr/bin/java`) has no `javac`. Always use `scripts/contain.sh`,
   which sets `JAVA_HOME` to `.tools/jdk`.
 - The build warns "Unable to strip ... libandroidx.graphics.path.so". It still succeeds.
+- After the phone restarts, `adb` may say "no permissions". Running
+  `scripts/contain.sh adb kill-server` and listing devices again fixed it.
 - If a build fails instantly for no clear reason, run `scripts/contain.sh ./gradlew --stop`
   and retry. This fixed one failure, probably a stale Gradle daemon.
 - Slow or unstable internet: GitHub downloads failed without an IPv4 address and ran
@@ -110,95 +114,66 @@ user if it matters.
 
 ## 8. Phase 1 (in progress)
 
-Goal: find out what a normal app can really observe when a phone is unlocked.
-Details: plan §3 (Phase 1), §5.2 (test matrix).
+Details: plan §3 (Phase 1), §5.2 (test matrix). Results:
+[EXPERIMENT_RESULTS.md](EXPERIMENT_RESULTS.md) (F1 to F16; F3 is retracted).
 
 ### Decided by the user (2026-11-26)
 
-- Logging code in a separate `spike` module (own app, app ID
-  `io.github.vinayrepalle.unlockwall.spike`, `minSdk` 35). Delete it after Phase 1.
-- Use usage access as a second signal; log only keyguard events.
+- Separate `spike` app (`io.github.vinayrepalle.unlockwall.spike`, `minSdk` 35), deleted
+  after Phase 1.
 - Claude may install and update the spike over USB. The user changes permissions and
   phone settings by hand.
-- Test PIN first, then switch briefly to pattern.
-- Skip swipe-only lock (T-07) and Extend Unlock (T-18): record as untested.
-- 20 unlocks per method.
-- Survival tests: default settings first, then Autostart and battery exemption (two nights).
-- The iQOO has PIN and fingerprint set up, **no face** (T-06 untested unless added).
-- **A second phone must be supported:** a friend's realme P3 5G (ships with Android 15,
-  realme UI 6.0, per specs the user pasted; installed version not checked).
+- Skip swipe-only lock (T-07) and Extend Unlock (T-18): untested.
+- The iQOO has PIN and fingerprint, **no face** (T-06 untested unless added).
+- **A friend's realme P3 5G must also be supported** (shipped with Android 15 per specs
+  the user pasted; installed version not checked).
+- No blue in the UI, also for the product (Phase 4). Black and green was disliked; the
+  spike now has a light, clean style. Product design is still to be agreed.
 
-### Scope wish stated by the user (2026-11-26, gate not yet held)
+### Version 1 direction (agreed in discussion; formal gate not yet held)
 
-- Version 1: change the **home screen** wallpaper according to how the phone was unlocked
-  (PIN, face, fingerprint). Lock screen wallpaper: later, maybe version 2.
-- **Agreed (2026-11-26):** version 1 uses two home screen wallpapers, "quick unlock"
-  (under 1.5 s) and "slow unlock", changed after unlock and only when the kind differs from
-  the last one. Do not label them fingerprint/PIN. Lock screen is version 2.
-- `setStream` is much shorter in the log than `setBitmap`, but the user saw no difference
-  (F11).
-- **Privacy concern raised by the user:** a personal "quick unlock" photo must not be seen
-  by someone who unlocks with PIN or pattern. Agreed to try: three home wallpapers
-  (normal, quick, slow), normal restored at every screen off, quick limit **1 s**, nothing
-  changes when unclear. It is not a guaranteed protection (phone handed over unlocked, app
-  stopped while the photo shows, a PIN entered in under 1 s).
-- Tested (F12): the user never saw "Personal" after a PIN unlock. Usage access is not
-  needed (F13). Not tested unplugged or with the app stopped.
-- The user suggested asking "is this personal?" when picking a wallpaper. Proposed
-  instead: always restore normal at screen off, no question. Awaiting their view.
-- F3 (the "1.2 s late" claim) was retracted: usage-access time stamps are offset.
+- Home screen only. Lock screen is version 2.
+- Three wallpapers: **Normal** (default), **quick unlock** (`USER_PRESENT` under **1 s**
+  after `SCREEN_ON`; usually fingerprint) and **slow unlock** (usually PIN or pattern).
+  Do not label them as unlock methods in the app.
+- Restore Normal at screen off, at `ACTION_SHUTDOWN` and at every service start. Keep it
+  for 60 s after the service starts, and whenever the unlock is unclear. The user requires
+  Normal after a restart or power off.
+- Needs Autostart (manual) and unrestricted battery. Usage access is **not** needed.
+- The app must say this is not a security feature. Known gaps: phone handed over unlocked,
+  app stopped while the personal photo shows, forced power-off, a PIN entered under 1 s,
+  a late `SCREEN_ON` making a slow unlock look quick (not observed).
+- Use `setStream`. The user sees about 1.5 s before the picture changes; the cause is not
+  known.
+- Proposed, not answered: do not ask "is this personal?" when picking a wallpaper.
 
-**Next: E4 survival, run 1 (default phone settings).** Label "Survival", unplugged: use
-for an hour, swipe the app from recents, leave overnight, reboot, then plug in. Do not
-reinstall the spike during the run. Run 2 repeats it with Autostart and battery
-exemption. Then force stop, then the realme, then the gate.
+### The spike
 
-**Design wish from the user:** no blue in the app UI (applies to the product UI in
-Phase 4 too). Black and green with large buttons was tried and **disliked**. The user then
-picked **light and clean** (white, black text, one filled main button, slim rows, chips),
-now in the spike; top half checked by screenshot, lower half not. Their opinion of the
-result is awaited. Test pictures use orange and grey instead of blue.
-
-### Open questions
-
-- How to test the realme (plug into this laptop, or send the APK and get the log back),
-  its Android version and its unlock methods.
-- The product app has `minSdk` 36 and will not install on Android 15. Proposed: lower to
-  35 in Phase 2.
-
-### Built
-
-`spike/` has no libraries. It logs `SCREEN_ON/OFF`, `USER_PRESENT`, lock state, timings,
-process exits and keyguard usage events; has test labels, in-app fingerprint and PIN
-prompt buttons (replaces testing with a third-party app, E3), an optional
-wallpaper-on-unlock test (E5/E6) and "Save log to Downloads".
+No libraries. Logs screen and unlock events, lock state, timings, process exits and
+keyguard usage events. Has test labels, in-app prompt buttons, wallpaper tests and the
+three-wallpaper "Friend scenario".
 
 ```bash
 scripts/contain.sh ./gradlew :spike:assembleDebug --offline
-scripts/contain.sh adb install -r spike/build/outputs/apk/debug/spike-debug.apk
+scripts/contain.sh adb install -r spike/build/outputs/apk/debug/spike-debug.apk  # stops the logger
 scripts/contain.sh adb shell run-as io.github.vinayrepalle.unlockwall.spike cat files/events.log
 ```
 
-Verified on the iQOO (2026-11-26): builds, installs, starts; the service runs in the
-foreground; `SCREEN_ON/OFF`, `USER_PRESENT` and usage keyguard events are logged (one PIN
-unlock). **Not tested:** prompts, wallpaper changes, boot start, log export, the realme.
-Lint not run.
-
-### Findings so far
-
-All results go in [EXPERIMENT_RESULTS.md](EXPERIMENT_RESULTS.md). Most important: the
-receiver must be `RECEIVER_EXPORTED`, or `USER_PRESENT` never arrives (confirmed on the
-iQOO; plan §2.4 corrected).
+**Not tested:** lock screen wallpaper, face, third-party in-app prompts, "Save log to
+Downloads", lower half of the new screen by screenshot, unlock delay with and without the
+app (T-15), the realme. Lint not run.
 
 ### Remaining
 
-1. Session C (E4 survival), described above.
-2. The realme tests.
-3. Keep writing every result, including failures and untested items, to
-   `docs/EXPERIMENT_RESULTS.md`.
-4. **Gate:** show the results and agree the product scope with the user before Phase 2.
-   So far on the iQOO, timing alone gives "quick unlock" (under 1.5 s, always fingerprint)
-   versus "slow unlock" (PIN, pattern or a paused fingerprint); no exact method.
+1. **Overnight test (user, later):** unplugged, Friend scenario on, label "Survival". In
+   the morning, without opening the app: PIN unlock, then lock and use a finger on the
+   dark screen. "Personal" should appear.
+2. Force stop test.
+3. The realme. Open: plug it into this laptop or send the APK and get the log back; its
+   Android version and unlock methods.
+4. **Gate:** agree the scope above, then update the plan (state machine §2.3: `USER_PRESENT`
+   can arrive before `SCREEN_ON` and late; fallback §2.6; permissions) before Phase 2.
+5. Phase 2: lower the product app's `minSdk` from 36 to 35 for the realme (proposed).
 
 ## 9. Git
 

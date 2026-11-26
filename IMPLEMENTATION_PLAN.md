@@ -1,9 +1,11 @@
 # UnlockWall: Implementation Plan
 
-Status (2026-11-26): **Phase 0 done; Phase 1 is next.** Only a "hello" app exists. No
-unlock or wallpaper claim below is verified on hardware unless a test ID is marked
-"PASSED" (none are yet). See [docs/HANDOFF.md](docs/HANDOFF.md) for the current state
-and [README.md](README.md) for the feasibility evidence behind this plan.
+Status (2026-11-26): **Phase 0 done; Phase 1 in progress.** The product app is still a
+"hello" screen. Experiment results are in
+[docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md); the direction they point to, and
+what this plan must change after the Phase 1 gate, is in
+[docs/HANDOFF.md](docs/HANDOFF.md) §8. See [README.md](README.md) for the feasibility
+evidence behind this plan.
 
 ## 1. Guiding decisions
 

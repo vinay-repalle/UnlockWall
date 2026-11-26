@@ -50,6 +50,11 @@ object EventLog {
             "interactive=${power.isInteractive} display=$displayState"
     }
 
+    /** Waits until queued lines are on disk (used at shutdown). */
+    fun flush() {
+        io.submit {}.get()
+    }
+
     fun log(context: Context, event: String, details: String = "") {
         val elapsedMs = SystemClock.elapsedRealtimeNanos() / 1_000_000.0
         val line = listOf(

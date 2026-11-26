@@ -6,8 +6,10 @@ unlocked (PIN, pattern, fingerprint, face).
 
 - **Target device:** iQOO Z9x 5G (model PD2353), Android 16 (OriginOS 6)
 - **Constraints:** no root, no custom ROM, never delay or interfere with unlocking
-- **Status (2026-11-26):** Phase 0 done. A "hello" app builds, installs and runs on the
-  phone. **No unlock detection or wallpaper feature exists yet.** Next: Phase 1.
+- **Status (2026-11-26):** Phase 1 (experiments) in progress, using a temporary test app
+  in `spike/`. **The real app is still a "hello" screen.** Results:
+  [docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md). The report below predates
+  them.
 
 Current state: [docs/HANDOFF.md](docs/HANDOFF.md) ·
 Plan: [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)

@@ -12,10 +12,13 @@ import android.os.SystemClock
 import android.view.Display
 import java.io.File
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
 
 /**
  * Three home screen wallpapers. NORMAL is the safe default: it comes back at every screen
- * off, and stays whenever the unlock is unclear. QUICK and SLOW are applied after unlock.
+ * off and at shutdown, and stays whenever the unlock is unclear or the app has only just
+ * started. QUICK and SLOW are applied after unlock.
  */
 object FriendScenario {
     private const val NORMAL = "normal"
@@ -23,24 +26,53 @@ object FriendScenario {
     private const val SLOW = "slow"
     private const val QUICK_LIMIT_MS = 1_000
 
+    /** After a start, unlock signals can be late or out of order (seen after reboot). */
+    private const val HOLD_AFTER_START_MS = 60_000L
+
     private val worker = Executors.newSingleThreadExecutor()
+    private var holdUntil = 0L
+
+    @Volatile
+    private var shuttingDown = false
 
     fun enabled(context: Context): Boolean = EventLog.prefs(context).getBoolean("friend", false)
 
     fun setEnabled(context: Context, on: Boolean) {
         EventLog.prefs(context).edit().putBoolean("friend", on).remove("friendShown").apply()
         EventLog.log(context, "FRIEND_MODE", "on=$on")
-        if (on) show(context, NORMAL, "switched-on")
+        if (on) show(context, NORMAL, "switched-on", force = true)
     }
 
-    /** Also used when the service starts, so a stopped app does not leave a photo behind. */
     fun reset(context: Context, why: String) {
         if (enabled(context)) show(context, NORMAL, why)
+    }
+
+    /** Restores NORMAL, whatever was recorded, so a stopped app does not leave a photo. */
+    fun onServiceStart(context: Context) {
+        shuttingDown = false
+        holdUntil = SystemClock.elapsedRealtime() + HOLD_AFTER_START_MS
+        if (enabled(context)) show(context, NORMAL, "service-start", force = true)
+    }
+
+    /** Waits for the change to finish, so the phone does not power off in the middle. */
+    fun onShutdown(context: Context) {
+        shuttingDown = true
+        if (!enabled(context)) return
+        try {
+            show(context, NORMAL, "shutdown", force = true).get(5, TimeUnit.SECONDS)
+        } catch (e: Exception) {
+            EventLog.log(context, "FRIEND_ERROR", "shutdown wait $e")
+        }
     }
 
     /** [sinceScreenOnMs] is null when no SCREEN_ON was seen: unclear, so nothing changes. */
     fun onUnlock(context: Context, sinceScreenOnMs: Long?) {
         if (!enabled(context)) return
+        if (SystemClock.elapsedRealtime() < holdUntil) {
+            EventLog.log(context, "FRIEND_HOLD", "just-started kept=normal")
+            show(context, NORMAL, "hold")
+            return
+        }
         if (sinceScreenOnMs == null) {
             EventLog.log(context, "FRIEND_UNCLEAR", "kept=normal")
             return
@@ -49,15 +81,18 @@ object FriendScenario {
         show(context, kind, "unlock sinceScreenOnMs=$sinceScreenOnMs")
     }
 
-    private fun show(context: Context, kind: String, why: String) {
+    private fun show(context: Context, kind: String, why: String, force: Boolean = false): Future<*> {
         // Keeps the CPU awake until the change is done, even though the screen is going off.
         val wakeLock = context.getSystemService(PowerManager::class.java)
             .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "uwspike:wallpaper")
         wakeLock.acquire(10_000)
-        worker.execute {
+        return worker.submit {
             try {
                 val prefs = EventLog.prefs(context)
-                if (prefs.getString("friendShown", null) == kind) return@execute
+                if (shuttingDown && kind != NORMAL) return@submit
+                if (!force && prefs.getString("friendShown", null) == kind) return@submit
+                // Forget the record first: if the phone dies mid-change, nothing is assumed.
+                prefs.edit().remove("friendShown").commit()
                 val file = image(context, kind)
                 val start = SystemClock.elapsedRealtime()
                 file.inputStream().use {
@@ -65,7 +100,7 @@ object FriendScenario {
                         .setStream(it, null, false, WallpaperManager.FLAG_SYSTEM)
                 }
                 val setMs = SystemClock.elapsedRealtime() - start
-                prefs.edit().putString("friendShown", kind).apply()
+                prefs.edit().putString("friendShown", kind).commit()
                 EventLog.log(context, "FRIEND_SET", "kind=$kind setMs=$setMs why=$why")
             } catch (e: Exception) {
                 EventLog.log(context, "FRIEND_ERROR", "kind=$kind $e")

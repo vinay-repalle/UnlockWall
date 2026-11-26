@@ -34,6 +34,7 @@ class SpikeService : Service() {
                 "sinceScreenOffMs=${msBetween(screenOffNanos, received)}"
 
             when (intent.action) {
+                Intent.ACTION_SHUTDOWN -> FriendScenario.onShutdown(applicationContext)
                 Intent.ACTION_SCREEN_ON -> {
                     screenOnNanos = received
                     if (getSystemService(KeyguardManager::class.java).isKeyguardLocked) {
@@ -66,6 +67,7 @@ class SpikeService : Service() {
 
             val costMs = msBetween(received, SystemClock.elapsedRealtimeNanos())
             EventLog.log(context, event, "$details onReceiveMs=$costMs")
+            if (intent.action == Intent.ACTION_SHUTDOWN) EventLog.flush()
         }
     }
 
@@ -89,6 +91,7 @@ class SpikeService : Service() {
             addAction(Intent.ACTION_SCREEN_ON)
             addAction(Intent.ACTION_SCREEN_OFF)
             addAction(Intent.ACTION_USER_PRESENT)
+            addAction(Intent.ACTION_SHUTDOWN)
         }
         // Must be EXPORTED: USER_PRESENT is sent by SystemUI, which does not run as the system
         // user, so a NOT_EXPORTED receiver never gets it (seen on the iQOO). All three actions
@@ -96,7 +99,7 @@ class SpikeService : Service() {
         registerReceiver(receiver, filter, RECEIVER_EXPORTED)
         running = true
         EventLog.log(this, "SERVICE_CREATE", EventLog.state(this))
-        FriendScenario.reset(applicationContext, "service-start")
+        FriendScenario.onServiceStart(applicationContext)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
