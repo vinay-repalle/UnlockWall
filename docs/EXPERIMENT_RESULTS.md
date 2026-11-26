@@ -1,0 +1,214 @@
+# UnlockWall: experiment results (Phase 1)
+
+Only what was observed on a real phone is written here.
+
+## Phones
+
+| Phone | Android | Build | Lock methods set up |
+|---|---|---|---|
+| iQOO Z9x 5G (`I2219`) | 16 (API 36) | `PD2353BF_EX_A_16.2.17.0.W30` | PIN, fingerprint (no face) |
+| realme P3 5G (friend's) | not checked | not checked | not checked; **not tested** |
+
+## Status
+
+| ID | Question | Status |
+|---|---|---|
+| E1 | Does `USER_PRESENT` fire for every unlock, and how fast? | PIN (F2) and fingerprint, dark screen (F6) and lock screen (F7), pattern (F9): every unlock detected |
+| E2 | Does any signal differ between unlock methods? | Timing only: separates quick fingerprint unlocks from PIN, not slow ones from PIN or pattern (F6, F7, F9) |
+| E3 | Do in-app prompts emit anything? | Our own app's prompts: nothing (F8). Third-party apps not run |
+| E4 | Does the service survive? | Not run |
+| E5 | Wallpaper speed, flash, lock screen | Home screen (F10, F11, F12). Lock screen: version 2, not run |
+| E6 | Does OriginOS theming override the wallpaper? | Home screen: no override seen (F10). Reboot, themes, lock screen not run |
+
+## Findings
+
+### F1: the receiver must be `RECEIVER_EXPORTED` (iQOO, 2026-11-26)
+
+- With `RECEIVER_NOT_EXPORTED`, `SCREEN_ON` and `SCREEN_OFF` arrived but `USER_PRESENT`
+  never did.
+- `adb shell dumpsys activity broadcasts history` showed the unlock's `USER_PRESENT`
+  (10:16:18) was sent by `com.android.systemui` (uid 10095, not the system uid) to 94
+  receivers; the logging app was not among them.
+- After switching to `RECEIVER_EXPORTED`, `USER_PRESENT` arrived (10:20:48).
+
+### F2: PIN, 20 unlocks (iQOO, 2026-11-26, USB plugged in)
+
+- 20 `SCREEN_ON` while locked, 20 `USER_PRESENT`, exactly one per unlock. No duplicates,
+  none missed.
+- `SCREEN_ON` to `USER_PRESENT`: median 2458 ms, range 2059 to 4380 ms. This includes
+  typing the PIN.
+
+### F3: RETRACTED. Usage-access time stamps are about 1.2 s early on this phone
+
+An earlier version of this file said `USER_PRESENT` is sent about 1.2 s after the keyguard
+goes. That relied on usage-access time stamps, which turned out to be offset:
+
+- `KEYGUARD_SHOWN` is stamped a median 1297 ms before the app receives `SCREEN_OFF` with
+  the phone already locked (111 of 113).
+- For dark-screen fingerprint, `KEYGUARD_HIDDEN` is stamped a median 1039 ms before
+  `SCREEN_ON` (21 of 21), while the phone still reported locked at `SCREEN_ON`.
+- `isKeyguardLocked()` changes together with `USER_PRESENT` (F5).
+
+So there is **no evidence that `USER_PRESENT` is late**. Usage time stamps must not be
+compared with the app's clock. The direct check (polling usage access, app's own clock) agrees
+(F13).
+
+What stays true: `dumpsys` showed 16 to 22 ms from queuing the broadcast to delivery
+(n=4).
+
+### F4: receiver time (iQOO, 20 of each)
+
+| Event | `onReceive` median | max | over the 5 ms target |
+|---|---|---|---|
+| `USER_PRESENT` | 1.1 ms | 3.8 ms | 0 of 20 |
+| `SCREEN_ON` | 6.5 ms | 65.0 ms | 14 of 20 |
+| `SCREEN_OFF` | 6.8 ms | 69.8 ms | 11 of 20 |
+
+The spike reads three lock and screen states inside `onReceive`; the product should avoid
+unneeded calls there. Effect on unlocking has not been measured (T-15).
+
+### F5: asking "still locked?" every 100 ms gives no earlier signal (iQOO, PIN, n=5)
+
+The spike checked `isKeyguardLocked()` and `isDeviceLocked()` every 100 ms from
+`SCREEN_ON` while locked.
+
+| Unlock | Usage `KEYGUARD_HIDDEN` | Poll saw unlocked | `USER_PRESENT` received |
+|---|---|---|---|
+| 1 | 10:33:42.154 | 10:33:43.404 | 10:33:43.348 |
+| 2 | 10:33:54.707 | 10:33:55.885 | 10:33:55.906 |
+| 3 | 10:34:20.046 | 10:34:21.220 | 10:34:21.257 |
+| 4 | 10:34:34.115 | 10:34:35.315 | 10:34:35.317 |
+| 5 | 10:34:49.813 | 10:34:51.014 | 10:34:51.010 |
+
+- The poll saw the change between 37 ms before and 57 ms after `USER_PRESENT`. Both lock
+  values changed at the same check in 4 of these 5; in one, only the keyguard value had
+  changed when polling stopped.
+- So polling is not worth using for PIN. Fingerprint: see F6.
+- The checks took about 1.3 ms each (125 checks, 159 ms in total). Battery not measured.
+- All 5 unlocks gave exactly one `USER_PRESENT` (26 PIN `USER_PRESENT` logged in total:
+  the run of 20, one extra, and these 5).
+
+### F6: fingerprint from a dark screen, 20 unlocks (iQOO, 2026-11-26, USB plugged in)
+
+- 20 `SCREEN_ON`, 20 `USER_PRESENT`, one per unlock. At `SCREEN_ON` the phone still
+  reported locked in all 20.
+- `SCREEN_ON` to `USER_PRESENT`:
+
+| Method | n | min | median | max |
+|---|---|---|---|---|
+| Fingerprint, dark screen | 20 | 103 ms | 335 ms | 527 ms |
+| PIN (all PIN unlocks logged) | 27 | 1874 ms | 2387 ms | 4380 ms |
+
+- The ranges do not overlap in this data, so a time limit (for example 1 s) would have
+  separated them. This is a timing guess, not a reported unlock method. It says nothing
+  yet about fingerprint on a visible lock screen, face, pattern, or another phone.
+- Polling saw the keyguard gone a median of about 0.13 s (at most 0.42 s) before
+  `USER_PRESENT`, and in 8 of 20 while `isDeviceLocked()` was still true.
+
+### F7: fingerprint with the lock screen showing, 20 unlocks (iQOO, 2026-11-26)
+
+The user was asked to vary the pause before touching the sensor.
+
+- 21 `SCREEN_ON` (all locked), 20 `USER_PRESENT`. The one without was a wake of about 7 s
+  followed by screen off, with no unlock event: correct if no unlock was made then.
+- `SCREEN_ON` to `USER_PRESENT`: min 171 ms, median 1225 ms, max 3007 ms.
+
+Timing compared across all logged unlocks:
+
+| `SCREEN_ON` to `USER_PRESENT` | Fingerprint, dark (20) | Fingerprint, lock screen (20) | PIN (27) |
+|---|---|---|---|
+| under 1000 ms | 20 | 4 | 0 |
+| under 1500 ms | 20 | 16 | 0 |
+| under 1874 ms (fastest PIN) | 20 | 19 | 0 |
+
+- In this data a quick unlock (under 1.5 s) was always fingerprint. A slow one can be
+  either. The limits were picked after seeing the data and one user was measured, so a
+  faster PIN entry could fall under them.
+
+### F8: in-app prompts emit no unlock signal (iQOO, 2026-11-26)
+
+- 7 fingerprint and 6 PIN `BiometricPrompt`s from the logging app, all successful.
+- No `USER_PRESENT`, `SCREEN_ON/OFF` or polling event was logged during them.
+- Not covered: third-party apps (banking, WhatsApp), the Settings "confirm credential"
+  screen.
+- Usage access also recorded no keyguard event during the prompts (10:46:31 to 10:47:40).
+
+### F9: pattern, 20 unlocks (iQOO, 2026-11-26)
+
+- 20 `SCREEN_ON` (all locked), 20 `USER_PRESENT`, one per unlock.
+- `SCREEN_ON` to `USER_PRESENT`: min 2329 ms, median 2579 ms, max 6748 ms. None under
+  1500 ms.
+- The label was left on "in-app" by mistake, so these are the 20 unlocks logged with that
+  label after 10:50:36. The user confirmed they were all pattern.
+- Quick (under 1.5 s) unlocks over all runs: 36 of 40 fingerprint, 0 of 27 PIN, 0 of 20
+  pattern.
+
+### F10: changing the home screen wallpaper (iQOO, 2026-11-26, USB plugged in)
+
+Target: home only. Two generated 1080x2408 JPEG test images, decoded then `setBitmap`.
+
+| When | n | `setBitmap` min / median / max | Trigger to `setBitmap` returning, median |
+|---|---|---|---|
+| After unlock (`USER_PRESENT`) | 5 | 2162 / 2212 / 2597 ms | 2594 ms |
+| Screen off | 12 | 1152 / 1522 / 3288 ms | 1629 ms |
+
+- No errors; 17 changes for 17 triggers. Decoding took 22 to 436 ms.
+- Plan A1 wants the change within 2 s. After unlock, this missed it in all 5.
+- What the user saw (estimates, not measured):
+  - After unlock: the old picture first, new one about 1 to 2 s after unlocking; possibly
+    a zoom-out animation.
+  - Screen off: felt much faster; nothing seen changing at unlock.
+  - Pictures appeared properly each time. The lock screen did not change.
+- When the new picture first becomes visible compared with `setBitmap` returning is not
+  known. Real photos may take a different time.
+
+### F11: `setStream` with the JPEG file versus `setBitmap` (iQOO, home, after unlock)
+
+| Method | n | Set call median (range) | `USER_PRESENT` to call returning, median |
+|---|---|---|---|
+| `setStream` (file as is) | 6 | 206 ms (183 to 253) | 208 ms |
+| `setBitmap` (decoded first) | 5 | 1170 ms (1132 to 1195) | 1221 ms |
+
+- No errors. 12 unlocks were asked for; 11 changes are in the log.
+- **The user saw no difference:** about 1.5 s every time. So the log time is not the time
+  the picture becomes visible. Where the visible delay comes from is not known; the earlier
+  explanation (late `USER_PRESENT`) is retracted (F3).
+- Use `setStream` in the product anyway: the call is much shorter. Visible gain not shown.
+
+### F12: friend scenario, three home wallpapers (iQOO, 2026-11-26, USB plugged in)
+
+Normal restored at every screen off; quick (under 1000 ms) shows "Personal"; slow shows
+"Slow"; unclear keeps Normal. The user ran: owner finger, friend PIN, fast friend PIN,
+finger after a pause.
+
+- **The user never saw Personal in a PIN test.** A finger used within about 1 s of waking
+  the lock screen gave Personal, which is what the rule does.
+- Log: 27 unlocks: 12 quick, 14 slow, 1 unclear. At no timed screen wake was Personal
+  still the current wallpaper.
+- Normal was restored 179 to 482 ms after the app got `SCREEN_OFF` (median 268, n=25).
+- The log does not record which method was used; the PIN result rests on what was seen.
+- Not tested: unplugged, app stopped by the phone, reboot while Personal is showing, real
+  photos, a second person.
+
+Two things to handle in the product:
+
+- **`USER_PRESENT` can arrive before `SCREEN_ON`** (once, 0.4 s before). It was treated as
+  unclear. The plan's state machine (§2.3) would ignore such an unlock.
+- **`USER_PRESENT` can be late** (once): at 11:48:03 the keyguard was gone 335 ms after
+  `SCREEN_ON`, but `USER_PRESENT` came at 1033 ms, so a probably quick unlock counted as
+  slow. This erred on the safe side.
+
+### F13: polling usage access gives no real gain (iQOO)
+
+- Polled every 100 ms from `SCREEN_ON`, the app first saw `KEYGUARD_HIDDEN` a median 10 ms
+  before `USER_PRESENT` (n=21). 20 were within about 120 ms; one was 766 ms early (the
+  late case above).
+- When first seen, the event's stamp was already about 1.2 s old, which confirms the
+  offset in F3.
+- The product does not need usage access.
+
+### Lock does not always engage at screen off
+
+Twice the screen was woken about 2 s after turning off and the phone was not locked
+(`SCREEN_ON` with `kgLocked=false`). No `USER_PRESENT` is expected then. The lock-delay
+setting on the phone has not been checked.

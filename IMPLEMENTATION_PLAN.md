@@ -63,8 +63,9 @@ States: `UNLOCKED_INTERACTIVE`, `SCREEN_OFF`, `LOCKED_SCREEN_ON`.
 
 - `UnlockMonitorService`: FGS type `specialUse` (manifest `<property>` declaring the
   use case), low-importance ongoing notification, registers the receiver with
-  `ContextCompat.registerReceiver(..., RECEIVER_NOT_EXPORTED)`; unregisters in
-  `onDestroy`. Started from the UI when the switch turns ON and from `BootReceiver`
+  `RECEIVER_EXPORTED` (with `NOT_EXPORTED`, `USER_PRESENT` never arrives on the iQOO; see
+  [docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md) F1) and checks the action;
+  unregisters in `onDestroy`. Started from the UI when the switch turns ON and from `BootReceiver`
   (`BOOT_COMPLETED`) if enabled.
 - **Switch OFF** = service stopped, receiver unregistered. The policy also checks
   `enabled` on every event, so a race cannot apply a wallpaper while OFF.
