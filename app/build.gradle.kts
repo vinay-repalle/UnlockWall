@@ -10,11 +10,12 @@ android {
 
     defaultConfig {
         applicationId = "io.github.vinayrepalle.unlockwall"
-        // Only one target phone (Android 16), so no older versions to support.
-        minSdk = 36
+        // Target phones: iQOO Z9x (Android 16) and a realme P3 5G (shipped with Android 15).
+        minSdk = 35
         targetSdk = 36
         versionCode = 1
         versionName = "0.1"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildFeatures {
@@ -27,4 +28,10 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.datastore.preferences)
+
+    testImplementation(libs.junit)
+
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.junit)
 }

@@ -11,14 +11,15 @@ Last updated: 2026-11-26.
 |---|---|---|
 | Planning | Feasibility report and plan | Done |
 | 0 | Toolchain, phone connection, hello app | **Done (2026-11-26)** |
-| 1 | Logging "spike" app and experiments on the phone | **In progress: most iQOO experiments done; overnight, realme and gate left** (§8) |
-| 2 | Core logic and unit tests | Not started |
-| 3 | Service, boot, wallpaper changes | Not started |
+| 1 | Logging "spike" app and experiments on the phone | **Done; gate passed 2026-11-26** (some tests deferred, §8) |
+| 2 | Core logic and unit tests | **Done (2026-11-26)** (§8a) |
+| 3 | Service, boot, wallpaper changes | **Next, not started** |
 | 4 | UI | Not started |
 | 5 | Hardening and release | Not started |
 
-The product app (**UnlockWall**) is still only a "hello" screen. All unlock and wallpaper
-code is in the throwaway `spike` module (**UW Spike** on the phone). No acceptance test
+The product app (**UnlockWall**) still shows only the "hello" screen: the Phase 2 logic is
+tested but not connected. The unlock and wallpaper behaviour seen on the phone so far is
+from the throwaway `spike` module (**UW Spike**). No acceptance test
 (A1 to A9) has been passed; what the spike showed is in
 [EXPERIMENT_RESULTS.md](EXPERIMENT_RESULTS.md).
 
@@ -81,14 +82,14 @@ All of it is in `.tools/` (git-ignored, exists only on this laptop).
 | Compose BOM | 2026.06.01 (Compose 1.11.4) |
 | activity-compose | 1.13.0 |
 
-App: ID `io.github.vinayrepalle.unlockwall`, `compileSdk`/`targetSdk`/`minSdk` 36,
-version 0.1.
+App: ID `io.github.vinayrepalle.unlockwall`, `compileSdk`/`targetSdk` 36, `minSdk` 35,
+version 0.1. Added in Phase 2 (approved): DataStore Preferences 1.3.0, JUnit 4.13.2,
+AndroidX Test runner 1.7.0 and ext-junit 1.3.0.
 
 Decisions made by the user: Temurin 21; latest stable build tools with `compileSdk` 36
 (use older libraries if the newest need more); the app ID above; USB cable.
 
-Chosen by Claude without asking: `minSdk` 36 (only one target phone). Confirm with the
-user if it matters.
+`minSdk` was lowered to 35 (approved) for the realme.
 
 ## 7. Known gotchas
 
@@ -112,7 +113,7 @@ user if it matters.
     then `sdkmanager` for `platform-tools`, `platforms;android-36`, `build-tools;36.1.0`.
   - Gradle: the wrapper (`./gradlew`) downloads it and checks the checksum itself.
 
-## 8. Phase 1 (in progress)
+## 8. Phase 1 (done, with deferred tests)
 
 Details: plan §3 (Phase 1), §5.2 (test matrix). Results:
 [EXPERIMENT_RESULTS.md](EXPERIMENT_RESULTS.md) (F1 to F16; F3 is retracted).
@@ -130,7 +131,7 @@ Details: plan §3 (Phase 1), §5.2 (test matrix). Results:
 - No blue in the UI, also for the product (Phase 4). Black and green was disliked; the
   spike now has a light, clean style. Product design is still to be agreed.
 
-### Version 1 direction (agreed in discussion; formal gate not yet held)
+### Version 1 scope (agreed at the gate)
 
 - Home screen only. Lock screen is version 2.
 - Three wallpapers: **Normal** (default), **quick unlock** (`USER_PRESENT` under **1 s**
@@ -163,17 +164,36 @@ scripts/contain.sh adb shell run-as io.github.vinayrepalle.unlockwall.spike cat 
 Downloads", lower half of the new screen by screenshot, unlock delay with and without the
 app (T-15), the realme. Lint not run.
 
-### Remaining
+### Deferred tests (still untested)
 
-1. **Overnight test (user, later):** unplugged, Friend scenario on, label "Survival". In
+1. Overnight (user will do it later): unplugged, Friend scenario on, label "Survival". In
    the morning, without opening the app: PIN unlock, then lock and use a finger on the
    dark screen. "Personal" should appear.
-2. Force stop test.
-3. The realme. Open: plug it into this laptop or send the APK and get the log back; its
-   Android version and unlock methods.
-4. **Gate:** agree the scope above, then update the plan (state machine §2.3: `USER_PRESENT`
-   can arrive before `SCREEN_ON` and late; fallback §2.6; permissions) before Phase 2.
-5. Phase 2: lower the product app's `minSdk` from 36 to 35 for the realme (proposed).
+2. Force stop. 3. The realme (how to test it, its Android version and unlock methods are
+   open). 4. Face, if set up.
+
+## 8a. Phase 2 (done 2026-11-26)
+
+In `app/src/main/java/io/github/vinayrepalle/unlockwall/`: `core/` (rules, no Android
+imports), `settings/SettingsRepository`, `wallpaper/WallpaperCache`. Face needs no code.
+
+Verified: 27 unit tests pass (state machine 16, policy 8, settings 3); 8 cache tests pass
+on the iQOO; the app installs and starts. Not tested: lint, the realme, EXIF rotation of
+real camera photos, very large or unusual image formats.
+
+```bash
+scripts/contain.sh ./gradlew :app:testDebugUnitTest
+scripts/contain.sh ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest
+scripts/contain.sh adb install -r app/build/outputs/apk/debug/app-debug.apk
+scripts/contain.sh adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+scripts/contain.sh adb shell am instrument -w io.github.vinayrepalle.unlockwall.test/androidx.test.runner.AndroidJUnitRunner
+scripts/contain.sh adb uninstall io.github.vinayrepalle.unlockwall.test
+```
+
+(`connectedAndroidTest` was not used because it uninstalls the app afterwards.)
+
+**Next, Phase 3:** short plan and questions first. Stop the spike's logger and Friend
+scenario before testing the real app, or both will change the wallpaper.
 
 ## 9. Git
 

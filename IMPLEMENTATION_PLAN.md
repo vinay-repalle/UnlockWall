@@ -1,11 +1,13 @@
 # UnlockWall: Implementation Plan
 
-Status (2026-11-26): **Phase 0 done; Phase 1 in progress.** The product app is still a
-"hello" screen. Experiment results are in
-[docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md); the direction they point to, and
-what this plan must change after the Phase 1 gate, is in
-[docs/HANDOFF.md](docs/HANDOFF.md) §8. See [README.md](README.md) for the feasibility
-evidence behind this plan.
+Status (2026-11-26): **Phases 0 to 2 done; Phase 3 is next.** The product app is still a
+"hello" screen: its logic exists and is tested but is not connected to anything. Results:
+[docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md). Current state:
+[docs/HANDOFF.md](docs/HANDOFF.md). Feasibility evidence: [README.md](README.md).
+
+**Scope of version 1** (Phase 1 gate, 2026-11-26): home screen only; three pictures
+(Normal, Quick unlock, Slow unlock). Android reports no unlock method, so only speed is
+used. Not a security feature. Lock screen is version 2.
 
 ## 1. Guiding decisions
 
@@ -25,41 +27,28 @@ evidence behind this plan.
 
 | Package | Responsibility |
 |---|---|
-| `ui` | Compose screens: Home (ON/OFF, status/health), Mapping (per-method wallpaper picker), Fallback, Diagnostics log |
-| `settings` | `SettingsRepository` over Jetpack DataStore: `enabled`, `mapping[method]→WallpaperRef`, `fallback`, `target` (home/lock/both) |
+| `ui` | Compose screens: Home (ON/OFF, status/health), three picture pickers, setup guide, diagnostics log. No blue |
+| `settings` | `SettingsRepository` over Jetpack DataStore: `enabled`, `showing` (slot last set) |
 | `monitor` | `UnlockMonitorService` (FGS, `specialUse`), runtime `BroadcastReceiver`, `BootReceiver` |
 | `core` | `UnlockStateMachine`, `UnlockMethodDetector` interface, `WallpaperPolicy`; **no Android imports** |
 | `wallpaper` | `WallpaperApplier` (WallpaperManager wrapper), `WallpaperCache` |
 | `diagnostics` | Ring-buffer event log (timestamps, states) shown in-app and exportable |
 
-### 2.2 Core types
+### 2.2 Core types (built in Phase 2)
 
-```kotlin
-enum class UnlockMethod { PIN_OR_PATTERN_LIKELY, BIOMETRIC_LIKELY, PIN, PATTERN, FINGERPRINT, FACE, UNKNOWN }
-data class UnlockEvent(val atElapsedMs: Long, val method: UnlockMethod, val confidence: Float)
+`Slot { NORMAL, QUICK, SLOW }`; `PhoneEvent` (service started, screen on/off, user
+present, shutting down, switched off); `Request(slot, reason, force)`.
 
-interface UnlockMethodDetector {            // v1 ships UnknownDetector only
-    fun classify(signals: UnlockSignals): UnlockMethod
-}
-```
+### 2.3 Rules (pure Kotlin: `UnlockStateMachine`, `WallpaperPolicy`)
 
-The fine-grained values (`PIN`, `FACE`…) exist in the type so the mapping UI can be
-built, but are only produced if Phase 1 proves a technique works. Otherwise they are
-hidden in the UI.
-
-### 2.3 State machine (pure Kotlin)
-
-States: `UNLOCKED_INTERACTIVE`, `SCREEN_OFF`, `LOCKED_SCREEN_ON`.
-
-- `SCREEN_OFF` → `SCREEN_OFF` state (record time). Keyguard is *showing* per docs.
-- `SCREEN_ON` → `LOCKED_SCREEN_ON` (record time). The state is validated with
-  `isKeyguardLocked()` at that moment.
-- `USER_PRESENT` while in `LOCKED_SCREEN_ON` → emit `UnlockEvent`. A `USER_PRESENT`
-  received in any other state is logged and **ignored**. This is the structural guard
-  against confusing in-app auth with device unlock.
-- Debounce duplicate `USER_PRESENT` within N ms.
-- Re-sync on service start via `isKeyguardLocked()` / `PowerManager.isInteractive`,
-  because broadcasts can be missed while the process was dead.
+- Normal is asked for at screen off, and forced at service start, shutdown and switch off.
+- `USER_PRESENT` under 1000 ms after the first `SCREEN_ON` is quick, else slow.
+- Normal instead when: within 60 s of service start; no `SCREEN_ON` seen (it can arrive
+  after `USER_PRESENT`); the phone still reports locked (late signal).
+- One decision per unlock. A second `SCREEN_ON` around an unlock means a lost
+  `SCREEN_OFF`: Normal.
+- No Normal picture: change nothing. Missing Quick or Slow picture: Normal.
+- Known gap: a late `SCREEN_ON` just before `USER_PRESENT` would look quick.
 
 ### 2.4 Service and receiver
 
@@ -76,20 +65,17 @@ States: `UNLOCKED_INTERACTIVE`, `SCREEN_OFF`, `LOCKED_SCREEN_ON`.
 
 ### 2.5 Wallpaper cache and applier
 
-- On selection, copy the picked image (Photo Picker / `GetContent`; no storage
-  permission) into app-private `filesDir/wallpapers/`, decoded once and **downsampled
-  to the screen's pixel size**, stored as WebP/JPEG, keyed by method.
-- On event, a single-thread dispatcher loads the file, calls
-  `setStream`/`setBitmap(..., which)` with `FLAG_SYSTEM`/`FLAG_LOCK` per the setting,
-  after checking `isWallpaperSupported()` and `isSetWallpaperAllowed()`.
-- Skip when the target equals the last-applied wallpaper id, to avoid pointless work and
-  flicker.
-- Catch every exception; on failure keep the current wallpaper and log.
+- `WallpaperCache` (built): one JPEG per slot in `filesDir/wallpapers/`, scaled to cover
+  the screen and centre-cropped. A failed save keeps the previous picture.
+- Applier (Phase 3): single worker thread, `setStream(..., FLAG_SYSTEM)`, partial wake
+  lock, `isWallpaperSupported()` / `isSetWallpaperAllowed()` checked. Forget `showing`
+  before setting and record it after. Catch every error and log it.
+- The user picks all three pictures, including Normal: a normal app is not expected to be
+  able to read the current wallpaper (from documentation; not tried).
 
-### 2.6 Fallback behaviour (requirement 7)
+### 2.6 Needed from the user on the phone
 
-Setting `fallbackMode ∈ { KEEP_CURRENT, USE_FALLBACK_IMAGE }`. Policy:
-`method == UNKNOWN` or no mapping for the method → apply fallback mode.
+Autostart (manual) and unrestricted battery. Usage access is not needed (F13).
 
 ## 3. Phases
 
@@ -123,8 +109,8 @@ usable discriminator (expected), product scope = "change wallpaper on every unlo
 with the method-mapping UI hidden or marked experimental.
 
 ### Phase 2: Core logic (device-independent)
-`core` module + unit tests for state machine and policy; `settings` repository;
-`WallpaperCache` with instrumented tests. **Exit:** all unit tests pass.
+**Done 2026-11-26.** `core` package + unit tests for state machine and policy; `settings`
+repository; `WallpaperCache` with instrumented tests. **Exit:** all unit tests pass.
 
 ### Phase 3: Service, boot, wallpaper integration
 Service, notification, boot receiver, applier. Health screen showing: service running,
@@ -139,12 +125,11 @@ diagnostics log, guided setup for battery/autostart. **Exit:** A7-A8.
 Soak test (24 h), error injection (deleted cache file, no permission, policy block),
 accessibility and dark-mode pass, release signing, `lint`, optional Play-policy check.
 
-## 4. Open design question for the user (decide after Phase 1)
+## 4. Decided: when to change the picture
 
-Because the wallpaper changes *after* the keyguard is gone, the home screen may flash
-the old wallpaper. Options: (a) accept the flash; (b) set `FLAG_LOCK` only, so the
-change is seen at the next lock screen; (c) rotate based on the previous unlock.
-The choice depends on E5 results.
+After unlock (the unlock kind is not known earlier), with Normal restored at screen off so
+that a personal picture is not on screen for the next person. The user sees about 1.5 s
+before the change.
 
 ## 5. Test plan
 
@@ -173,7 +158,7 @@ The choice depends on E5 results.
 | T-14 | Policy: `isSetWallpaperAllowed()` false (if testable) | Graceful no-op |
 | T-15 | Unlock latency: stopwatch/high-speed video with the app ON versus uninstalled | No perceptible difference; log timing |
 | T-16 | Rapid lock/unlock cycles (10 in 20 s) | No crash, no queue build-up |
-| T-17 | Unknown method path | Fallback applied per setting |
+| T-17 | Unclear unlock / missing picture | Normal shown |
 | T-18 | Trusted device / on-body detection (if configured) | Behaviour recorded |
 
 ### 5.3 Measurement of "never delay unlock" (req. 4)
@@ -190,7 +175,7 @@ Evidence required anyway: T-15 comparison plus `onReceive` duration logged
 | A3 | No perceptible unlock delay | T-15 |
 | A4 | With switch OFF, no automatic change ever occurs and the service is not running | T-08, `dumpsys activity services` |
 | A5 | Selected wallpapers are cached app-privately; the app works after the source image is deleted | T-13 + manual |
-| A6 | Unknown method → keeps current or applies fallback per setting | T-17 |
+| A6 | Unclear unlock or missing picture → Normal (no Normal picture → no change) | T-17 |
 | A7 | No root; no custom ROM; only permissions listed in README §1.9 | manifest review |
 | A8 | Survives 24 h soak with documented OEM settings applied | T-12 |
 | A9 | The documentation states plainly which unlock methods are detected on this device, backed by Phase 1 results | `docs/EXPERIMENT_RESULTS.md` |

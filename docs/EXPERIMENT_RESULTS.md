@@ -20,6 +20,15 @@ Only what was observed on a real phone is written here.
 | E5 | Wallpaper speed, flash, lock screen | Home screen (F10, F11, F12). Lock screen: version 2, not run |
 | E6 | Does OriginOS theming override the wallpaper? | Home screen: no override seen (F10). Reboot, themes, lock screen not run |
 
+## Gate decision (2026-11-26)
+
+**Go.** The user agreed: version 1 changes the home screen only, with Normal, Quick-unlock
+and Slow-unlock pictures (rules in the plan §2.3). Face is included only in the sense that
+a fast face unlock would count as quick; it cannot have its own picture.
+
+Not tested when the gate was passed: overnight or 1 hour survival, force stop, the realme,
+face, forced power-off, lock screen, third-party in-app prompts.
+
 ## Findings
 
 ### F1: the receiver must be `RECEIVER_EXPORTED` (iQOO, 2026-11-26)

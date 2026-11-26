@@ -6,8 +6,9 @@ unlocked (PIN, pattern, fingerprint, face).
 
 - **Target device:** iQOO Z9x 5G (model PD2353), Android 16 (OriginOS 6)
 - **Constraints:** no root, no custom ROM, never delay or interfere with unlocking
-- **Status (2026-11-26):** Phase 1 (experiments) in progress, using a temporary test app
-  in `spike/`. **The real app is still a "hello" screen.** Results:
+- **Status (2026-11-26):** Phases 0 to 2 done. **The real app is still a "hello" screen**;
+  its logic is tested but not connected. Experiments used a temporary app in `spike/`.
+  Results:
   [docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md). The report below predates
   them.
 
