@@ -1,7 +1,6 @@
 # UnlockWall: Implementation Plan
 
-Status (2026-11-26): **Phases 0 to 2 done; Phase 3 is next.** The product app is still a
-"hello" screen: its logic exists and is tested but is not connected to anything. Results:
+Status (2026-11-26): **Phases 0 to 3 done; Phase 4 is next** (overnight test still to run). The screen is a plain first version. Results:
 [docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md). Current state:
 [docs/HANDOFF.md](docs/HANDOFF.md). Feasibility evidence: [README.md](README.md).
 
@@ -42,7 +41,15 @@ present, shutting down, switched off); `Request(slot, reason, force)`.
 ### 2.3 Rules (pure Kotlin: `UnlockStateMachine`, `WallpaperPolicy`)
 
 - Normal is asked for at screen off, and forced at service start, shutdown and switch off.
-- `USER_PRESENT` under 1000 ms after the first `SCREEN_ON` is quick, else slow.
+- Quick or slow is judged when `isDeviceLocked()` turns false (polled every 100 ms while
+  the lock screen is on, for at most 60 s) or at `USER_PRESENT`, whichever is first:
+  under 1000 ms after the first `SCREEN_ON` is quick, else slow (F17: face unlock waits
+  for a swipe before `USER_PRESENT`).
+- Slower than that, but the lock screen still up 0.5 s after the device unlocked: face,
+  so quick (F18).
+- A `SCREEN_ON` that already shows keyguard locked but device unlocked: quick if the device
+  was locked at `SCREEN_OFF` (fast face, F19), else doubtful: Normal. Not for use with
+  Extend Unlock (trust agents).
 - Normal instead when: within 60 s of service start; no `SCREEN_ON` seen (it can arrive
   after `USER_PRESENT`); the phone still reports locked (late signal).
 - One decision per unlock. A second `SCREEN_ON` around an unlock means a lost
@@ -115,7 +122,8 @@ repository; `WallpaperCache` with instrumented tests. **Exit:** all unit tests p
 ### Phase 3: Service, boot, wallpaper integration
 Service, notification, boot receiver, applier. Health screen showing: service running,
 battery exemption state, notification permission, last event, last result.
-**Exit:** acceptance tests A1-A6 on device.
+**Exit:** acceptance tests A1-A6 on device. **Done 2026-11-26** (F21, F22; T-04 and the
+T-15 measurement not run).
 
 ### Phase 4: UI
 Compose: ON/OFF, wallpaper pickers, fallback option, target (home/lock/both),

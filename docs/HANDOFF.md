@@ -13,12 +13,12 @@ Last updated: 2026-11-26.
 | 0 | Toolchain, phone connection, hello app | **Done (2026-11-26)** |
 | 1 | Logging "spike" app and experiments on the phone | **Done; gate passed 2026-11-26** (some tests deferred, §8) |
 | 2 | Core logic and unit tests | **Done (2026-11-26)** (§8a) |
-| 3 | Service, boot, wallpaper changes | **Next, not started** |
+| 3 | Service, boot, wallpaper changes | **Done (2026-11-26)**; overnight test still to run (§8b) |
 | 4 | UI | Not started |
 | 5 | Hardening and release | Not started |
 
-The product app (**UnlockWall**) still shows only the "hello" screen: the Phase 2 logic is
-tested but not connected. The unlock and wallpaper behaviour seen on the phone so far is
+The product app (**UnlockWall**) now has its service and a basic screen, but no wallpaper
+behaviour of the real app has been seen on the phone yet. Everything observed so far is
 from the throwaway `spike` module (**UW Spike**). No acceptance test
 (A1 to A9) has been passed; what the spike showed is in
 [EXPERIMENT_RESULTS.md](EXPERIMENT_RESULTS.md).
@@ -192,8 +192,55 @@ scripts/contain.sh adb uninstall io.github.vinayrepalle.unlockwall.test
 
 (`connectedAndroidTest` was not used because it uninstalls the app afterwards.)
 
-**Next, Phase 3:** short plan and questions first. Stop the spike's logger and Friend
-scenario before testing the real app, or both will change the wallpaper.
+**Phase 3 questions approved (2026-11-26):** basic screen with switch and three pickers;
+overnight test on the real app; install over USB without asking.
+
+## 8b. Phase 3 (done)
+
+The user approved (2026-11-26): basic screen with switch and three pickers; overnight test
+on the real app; install over USB without asking; for face (F17), judge speed by when
+`isDeviceLocked()` turns false (polled every 100 ms while the lock screen is on), with
+face using the Quick picture. A separate face picture is only a possible later idea.
+
+Chosen while building (tell the user if it matters):
+
+- A wake whose `SCREEN_ON` already shows "keyguard locked, device unlocked" is doubtful and
+  keeps Normal (1 of 210 wakes in the spike log, a face try).
+- The service also restarts after an app update (`MY_PACKAGE_REPLACED`), and opening the
+  app restarts it if the switch is on but it is not running.
+- Changing a picture while on shows Normal at once.
+
+Code: `monitor/` (service, boot receiver, lock watcher, controller), `wallpaper/` (applier,
+cache), `diagnostics/`, `ui/`, `UnlockWallApp`. Screen texts are not yet in resources.
+
+Verified: 48 unit tests pass (state machine 33, policy 8, controller 4, settings 3); builds,
+installs, starts without a crash. **Not tested on the phone:** the screen's look, pickers,
+service, every unlock type, switch off, restart, power off, overnight, A1 to A6. Lint not
+run.
+
+Reading the app's log:
+`scripts/contain.sh adb shell run-as io.github.vinayrepalle.unlockwall cat files/diagnostics.log`
+
+**Before testing:** UW Spike must have Friend scenario off and logging stopped, or both
+apps change the wallpaper.
+
+**First device run (F18):** switching works; face gave Quick in 4 of 7 face-like wakes.
+The user saw no PIN unlock show Quick and approved the fix. Added 2026-11-26 14:14: if the
+lock screen is still up 0.5 s after a slow-looking device unlock, it is Quick
+(`FACE_UNLOCK`); extra logging of `isDeviceLocked()` around screen off. 45 unit tests pass;
+tried on the phone (F19): PIN never Quick; face 9 Quick, 3 doubtful Normal, 2 Slow. The
+restart after an app update was seen to work. Approved and added: if the device was
+locked at `SCREEN_OFF`, an already-unlocked `SCREEN_ON` counts as quick (**not yet tried
+on the phone**). The screen warns against Extend Unlock. Screen timeout wake test done
+(F20), no problem seen. 48 unit tests pass.
+
+**Phase 3 done (2026-11-26).** Tests A to H (F21) and A3, A5, A6 (F22) passed on the
+iQOO. Still untested: overnight (user will do it later), third-party app authentication
+(T-04), unlock delay measurement (T-15), forced power-off, the realme, lint.
+
+**Next, Phase 4 (UI), not started:** short plan and questions first. Includes the proper
+screen design (no blue), moving screen texts to resources and a setup guide. Proposed:
+delete the `spike` module and uninstall UW Spike at its start.
 
 ## 9. Git
 

@@ -255,6 +255,87 @@ User's observations, confirmed by the log:
   did start by itself both times.
 - Not covered: forced power-off.
 
+### F17: face unlock waits for a swipe (iQOO, 2026-11-26, after the gate)
+
+The user set up face unlock and saw it give the "Slow" picture. Confirmed in the log
+(3 face-style wakes; `dumpsys face` showed 1 enrolled face):
+
+| Wake | `isDeviceLocked()` false after | Lock screen gone after | `USER_PRESENT` after |
+|---|---|---|---|
+| 13:02:02 | 264 ms | 3638 ms | 4143 ms (set Slow) |
+| 13:05:47 | 186 ms | 3285 ms | 3689 ms (set Slow) |
+| 13:08:44 | 408 ms | not (screen went off) | none |
+
+- Face authenticates quickly but the lock screen stays until a swipe, and `USER_PRESENT`
+  comes only after the swipe. Judging speed by `USER_PRESENT` is wrong for face.
+- No other cycle in the log showed the device unlocked while the lock screen stayed for
+  over 1 s (the other long gaps were right after a reboot, where both changed together).
+- Also seen: after 12:00, `USER_PRESENT` came a median 474 ms after the device unlocked
+  (n=27), against 29 ms before 12:00 (n=97). Cause unknown. This changes F5's conclusion:
+  polling can now be about half a second earlier than `USER_PRESENT`.
+
+### F18: first run of the real app (iQOO, 2026-11-26, 14:04 to 14:07)
+
+Log only; the user's own observations were not given in detail. 13 unlocks, no crash, no
+failed change. Normal was restored after every screen off (136 to 896 ms to set).
+
+| Kind of wake | n | Quick | Slow | Normal (unclear) |
+|---|---|---|---|---|
+| Lock screen stayed after unlocking (face-like) | 7 | 4 | 1 (recognised after 1846 ms) | 2 (already unlocked at `SCREEN_ON`) |
+| Home screen straight away (finger or PIN) | 6 | 2 | 4 (1070 to 4291 ms) | 0 |
+
+The method used in each try was not recorded. Both "already unlocked" wakes came under
+1 s after screen off, so they may also be the phone not having locked yet.
+
+In the older spike data, the lock screen was still up when the device was first seen
+unlocked in 8 non-face-era unlocks, but only for 30 to 182 ms. With face it stayed for
+about 3 s. So "still up 0.5 s later" would separate them in this data.
+
+### F19: after the face fix (iQOO, 2026-11-26, 14:16 to 14:22)
+
+Which tries were which is taken from the order of the requested tests, so the group edges
+are approximate. No failed changes.
+
+- PIN: 7 unlocks, all Slow, none Quick. None left the lock screen up.
+- Face (about 14): 9 Quick (3 of them only thanks to the 0.5 s check), 2 Slow, 3 Normal
+  (already unlocked at `SCREEN_ON`).
+- `isDeviceLocked()` was true at `SCREEN_OFF` in 35 of 37 and still true 0.5 s later in 32
+  of 35. Before the doubtful wakes it was true at `SCREEN_OFF`, so the phone was
+  authenticated again after locking (consistent with face).
+
+### F20: screen turning off by itself (iQOO, 2026-11-26, 14:24 to 14:27)
+
+- After a timeout the phone was not yet locked 0.5 s after `SCREEN_OFF`. In the 5 logged
+  wakes (4.9 to 23 s later) it asked for authentication each time.
+- User's observations: where it asked, face and finger gave Quick and PIN gave Slow. When
+  they touched the dark screen quickly it needed no unlock. The log has no screen on/off for
+  that case, so it was probably the dimmed screen before turning off (not confirmed).
+- No case was reported or logged of Quick after getting in without authentication.
+
+### F21: Phase 3 tests of the real app (iQOO, 2026-11-26, 14:30 to 14:53)
+
+The user reported all of A to H passed. The log agrees:
+
+| Test | Log evidence |
+|---|---|
+| Face (A) | 3 `FACE_UNLOCK`; the one already-unlocked wake showed Quick; no unclear results |
+| Settings PIN screen, T-05 (B) | No unlock signal without a screen wake |
+| Rapid lock/unlock, T-16 (C) | No error, no crash |
+| Switch off and rapid toggling, T-08, T-09 (D, E) | Normal set at each switch off; no repeated signals; running at the end |
+| Restart with Quick showing, T-10 (F, G) | Normal set at `SHUTDOWN`; app started by itself; Quick after the 60 s hold |
+| Power off with Quick showing (H) | The same |
+
+The app started about 3 minutes after the shutdown signal both times (includes the time off
+and the first PIN). Not tested: third-party app authentication (T-04), original photo
+deleted (A5 manual), missing Slow picture on the phone (A6), unlock delay compared with
+the app absent (T-15), overnight, forced power-off.
+
+### F22: last Phase 3 checks (iQOO, 2026-11-26, user's report; log not read)
+
+- A5: the original photo deleted from the gallery, the wallpaper still showed. Passed.
+- A6: Slow picture removed, a PIN unlock showed Normal. Passed.
+- A3: unlocking does not feel slower. Passed by feel only; no measurement (T-15).
+
 ### Lock does not always engage at screen off
 
 Twice the screen was woken about 2 s after turning off and the phone was not locked

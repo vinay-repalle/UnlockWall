@@ -6,8 +6,8 @@ unlocked (PIN, pattern, fingerprint, face).
 
 - **Target device:** iQOO Z9x 5G (model PD2353), Android 16 (OriginOS 6)
 - **Constraints:** no root, no custom ROM, never delay or interfere with unlocking
-- **Status (2026-11-26):** Phases 0 to 2 done. **The real app is still a "hello" screen**;
-  its logic is tested but not connected. Experiments used a temporary app in `spike/`.
+- **Status (2026-11-26):** Phases 0 to 3 done on the iQOO (overnight test still to run);
+  Phase 4 (screen design) is next. Experiments used a temporary app in `spike/`.
   Results:
   [docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md). The report below predates
   them.
@@ -179,6 +179,7 @@ must be closed by experiment (plan Phase 1).
 | `SET_WALLPAPER` | normal | Set wallpaper | Blocked if `isSetWallpaperAllowed()` is false |
 | `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_SPECIAL_USE` | normal | Host the receiver | Persistent notification; Play review of the declared use case; OEM may still kill it |
 | `POST_NOTIFICATIONS` | runtime (API 33+) | Show the FGS notification | User can deny; the FGS still runs but the notification may be hidden |
+| `WAKE_LOCK` | normal | Finish a wallpaper change as the screen goes off | Held for at most 10 s |
 | `RECEIVE_BOOT_COMPLETED` | normal | Restart after reboot | Doc notes it increases startup cost |
 | `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` | normal | Ask for the battery exemption | The user chooses; OEM-specific Autostart and background settings are separate toggles that no public API controls |
 | `PACKAGE_USAGE_STATS` (optional) | special access | `KEYGUARD_HIDDEN` cross-check | User must enable it in Settings; broad data access; optional only |
