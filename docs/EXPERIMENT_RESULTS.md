@@ -364,6 +364,30 @@ screen with Save/Discard; pictures and setup kept after reopening; dark and ligh
 largest font size; saving the log. Not repeated on the release: restart, power off, force
 stop, notifications off. **A8 (24-hour soak) and overnight: not run.**
 
+### Release 1.0 overnight (iQOO, 2026-11-26 16:10 to 2026-11-27 11:36, log read)
+
+The user left the phone idle overnight with UnlockWall cleared from recent apps. Whether
+it was unplugged was not recorded. Log copy: `.tools/release/logs/` (this laptop only).
+
+- No screen events from 01:01 to 07:23. The process had run since about 17:52 on 11-26
+  and was still running at 11:32.
+- First morning unlock (07:23:20): 3.2 s after screen on, Slow. Next (07:23:41): 386 ms,
+  Quick.
+- Whole log: 163 wakes, 52 Quick, 46 Slow, 12 kept Normal (just started), 53 without an
+  unlock. Every wake with `USER_PRESENT` had a result. No "picture could not be set" line.
+- Device unlock time: Quick at most 846 ms, Slow at least 1007 ms. The method used for
+  each unlock is not logged, so correctness per method is not verified by the log.
+- Picture change: median 224 ms, maximum 1059 ms.
+- 3 times the screen came back on within about 1 s of going off, before Normal was set.
+  Normal was set 0.02 to 0.5 s after that wake.
+- Android killed the process 5 times for low memory (`dumpsys activity exit-info`: 16:28,
+  17:21, 17:24, 17:26, 17:37 on 11-26). It was back within 2 s three times, and after
+  about 14 minutes twice (whether by itself or by opening the app is not known). Normal
+  was showing at each kill.
+- Seen in the log: restart or power off (`SHUTDOWN`, `BOOT_COMPLETED`, Normal restored),
+  switch off and on. Notification permission was denied on 11-27 and switching worked.
+- **Not run:** force stop, forced power-off. **A8:** not yet 24 hours without a restart.
+
 ### Lock does not always engage at screen off
 
 Twice the screen was woken about 2 s after turning off and the phone was not locked

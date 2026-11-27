@@ -3,7 +3,7 @@
 The current state of the project, for a Claude session with no earlier context.
 **Keep this file up to date at the end of every phase** (and when stopping mid-phase).
 
-Last updated: 2026-11-26.
+Last updated: 2026-11-27.
 
 ## 1. Where things stand
 
@@ -13,7 +13,7 @@ Last updated: 2026-11-26.
 | 0 | Toolchain, phone connection, hello app | **Done (2026-11-26)** |
 | 1 | Logging "spike" app and experiments on the phone | **Done; gate passed 2026-11-26** (some tests deferred, §8) |
 | 2 | Core logic and unit tests | **Done (2026-11-26)** (§8a) |
-| 3 | Service, boot, wallpaper changes | **Done (2026-11-26)**; overnight test still to run (§8b) |
+| 3 | Service, boot, wallpaper changes | **Done (2026-11-26)**; overnight test passed 2026-11-27 (§8d) |
 | 4 | UI | **Done (2026-11-26)** (§8c) |
 | 5 | Hardening and release | **In progress**: release 1.0 installed on the iQOO, retest running (§8d) |
 
@@ -299,12 +299,16 @@ and setup kept after reopening; dark and light mode; largest font; Save log to D
 A copy of the release is at `release/UnlockWall-1.0.apk` (git-ignored) and in the phone's
 Downloads. Copying it to the laptop's own Downloads was not done (outside the project).
 
-**Still untested:** on the release: force stop, notifications off, restart, power off.
-Anywhere: forced power-off, overnight and 24 hours (A8; the user asked to leave this out of
-the README, it is **not** tested), the realme, T-04, T-15 measurement, screen reader.
+**Overnight on the release: passed (2026-11-27, log read;** details in
+[EXPERIMENT_RESULTS.md](EXPERIMENT_RESULTS.md)). The log also shows restart or power off,
+switch off/on and notifications denied working. Open point: 5 low-memory kills on 11-26;
+twice the app was not running for about 14 minutes, cause of the restart unknown.
 
-**Next:** read the saved log when the phone is plugged in, then decide with the user which
-of the above to run before calling Phase 5 done.
+**Still untested:** on the release: force stop. Anywhere: forced power-off, a full 24 hours
+(A8; the user asked to leave this out of the README, it is **not** tested), the realme,
+T-04, T-15 measurement, screen reader.
+
+**Next:** decide with the user which of the above to run before calling Phase 5 done.
 
 ## 9. Git
 
