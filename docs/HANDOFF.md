@@ -3,7 +3,7 @@
 The current state of the project, for a Claude session with no earlier context.
 **Keep this file up to date at the end of every phase** (and when stopping mid-phase).
 
-Last updated: 2026-11-27.
+Last updated: 2026-11-28.
 
 ## 1. Where things stand
 
@@ -15,12 +15,12 @@ Last updated: 2026-11-27.
 | 2 | Core logic and unit tests | **Done (2026-11-26)** (§8a) |
 | 3 | Service, boot, wallpaper changes | **Done (2026-11-26)**; overnight test passed 2026-11-27 (§8d) |
 | 4 | UI | **Done (2026-11-26)** (§8c) |
-| 5 | Hardening and release | **In progress**: release 1.0 installed on the iQOO, retest running (§8d) |
+| 5 | Hardening and release | **In progress**: release 1.0 on the iQOO; 24-hour test passed 2026-11-28 (§8d) |
 
 The app (**UnlockWall**) changes the home screen wallpaper on the iQOO, with a plain first
 screen. The Phase 1 test app was deleted. A1 to A6 passed on the iQOO (F21, F22), with
 two limits: third-party app authentication (T-04) was not tried, and "no delay" (A3) was
-judged by feel only. A7 to A9 are not done. See
+judged by feel only. A7 and A8 passed; A9 has not been formally checked. See
 [EXPERIMENT_RESULTS.md](EXPERIMENT_RESULTS.md).
 
 ## 2. Read in this order
@@ -304,8 +304,12 @@ Downloads. Copying it to the laptop's own Downloads was not done (outside the pr
 switch off/on and notifications denied working. Open point: 5 low-memory kills on 11-26;
 twice the app was not running for about 14 minutes, cause of the restart unknown.
 
-**Still untested:** on the release: force stop. Anywhere: forced power-off, a full 24 hours
-(A8; the user asked to leave this out of the README, it is **not** tested), the realme,
+**24-hour test (A8) on the release: passed (2026-11-28,** log and `adb` read; details in
+[EXPERIMENT_RESULTS.md](EXPERIMENT_RESULTS.md)). Same process for 40 h; 175 logged unlocks
+each had one result. An 18-minute stretch on 11-27 is missing from the saved logs: "Save
+log to Downloads" saves only the last 1000 lines (about a day of this user's use).
+
+**Still untested:** on the release: force stop. Anywhere: forced power-off, the realme,
 T-04, T-15 measurement, screen reader.
 
 **Next:** decide with the user which of the above to run before calling Phase 5 done.

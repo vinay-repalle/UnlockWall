@@ -386,7 +386,40 @@ it was unplugged was not recorded. Log copy: `.tools/release/logs/` (this laptop
   was showing at each kill.
 - Seen in the log: restart or power off (`SHUTDOWN`, `BOOT_COMPLETED`, Normal restored),
   switch off and on. Notification permission was denied on 11-27 and switching worked.
-- **Not run:** force stop, forced power-off. **A8:** not yet 24 hours without a restart.
+- **Not run:** force stop, forced power-off. **A8:** not yet 24 hours without a restart
+  at this point (done below).
+
+### Release 1.0, 24-hour test, A8 / T-12: passed (iQOO, 2026-11-28, log and `adb` read)
+
+Phone state read with `adb` at about 10:19 on 11-28:
+
+- The same app process had run since 11-26 17:52:30, **40 h 26 min**. The service was in
+  the foreground and the battery exemption was on.
+- No process exit since 11-26 17:37:49 and no phone restart since 11-26 16:24:44.
+- Whether the phone was charging during the period was not recorded.
+
+Logs (copies in `.tools/release/logs/`, this laptop only):
+
+| Period | Length | Wakes | Unlocks | Quick | Slow | Normal kept |
+|---|---|---|---|---|---|---|
+| 11-26 17:52 to 11-27 11:36 | 17 h 44 min | 128 | 83 | 40 | 41 | 2 (just started) |
+| 11-27 11:54 to 11-28 10:20 | 22 h 26 min | 184 | 92 | 43 | 48 | 1 (unclear) |
+
+- **Every logged unlock (175) had one result.** No unlock had two. No "picture could not
+  be set" line.
+- Every screen off was followed by Normal being set or already showing.
+- Second period: device unlock time was at most 974 ms for Quick and at least 1015 ms for
+  Slow. From unlock to the set call returning: median 406 ms, maximum 1504 ms (not the
+  time the picture became visible). Setting a picture: median 268 ms, maximum 623 ms.
+- The unclear result (11-27 18:20:06): `USER_PRESENT` arrived 0.6 s after the screen went
+  off again. Normal was kept, as designed.
+- Twice in the second period the screen came back on before Normal was set; Normal was set
+  111 ms and 53 ms after that wake.
+- **Gap:** 11-27 11:36:53 to 11:54:35 is in neither saved log, because "Save log to
+  Downloads" saves only the last 1000 lines. The process ran through it; unlocks in it
+  were not checked.
+- No face result (`FACE_UNLOCK`) appears in either period. The method used for each unlock
+  is not logged.
 
 ### Lock does not always engage at screen off
 

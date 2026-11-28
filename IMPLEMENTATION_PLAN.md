@@ -1,6 +1,6 @@
 # UnlockWall: Implementation Plan
 
-Status (2026-11-26): **Phases 0 to 4 done; Phase 5 in progress** (release 1.0 installed; 24-hour test not run). Results:
+Status (2026-11-28): **Phases 0 to 4 done; Phase 5 in progress** (release 1.0 installed; 24-hour test passed). Results:
 [docs/EXPERIMENT_RESULTS.md](docs/EXPERIMENT_RESULTS.md). Current state:
 [docs/HANDOFF.md](docs/HANDOFF.md). Feasibility evidence: [docs/FEASIBILITY.md](docs/FEASIBILITY.md).
 
